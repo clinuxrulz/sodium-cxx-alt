@@ -24,8 +24,16 @@ typedef struct Node: public IsNode {
     GcNode gc_node;
     SodiumCtx sodium_ctx;
 
+    Node(Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
+        node.gc_node.inc_ref();
+    }
+
     Node(std::shared_ptr<NodeData> data, GcNode gc_node, SodiumCtx sodium_ctx)
     : data(data), gc_node(gc_node), sodium_ctx(sodium_ctx) {}
+
+    virtual ~Node() {
+        this->gc_node.dec_ref();
+    }
 
     virtual Node node() {
         return *this;
@@ -114,6 +122,22 @@ public:
 
     virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() = 0;
 };
+
+std::vector<std::unique_ptr<IsNode>> box_clone_vec_is_node(std::vector<std::unique_ptr<IsNode>>& xs) {
+    std::vector<std::unique_ptr<IsNode>> result;
+    for (auto x = xs.begin(); x != xs.end(); ++x) {
+        result.push_back((*x)->box_clone());
+    }
+    return result;
+}
+
+std::vector<std::unique_ptr<IsWeakNode>> box_clone_vec_is_weak_node(std::vector<std::unique_ptr<IsWeakNode>>& xs) {
+    std::vector<std::unique_ptr<IsWeakNode>> result;
+    for (auto x = xs.begin(); x != xs.end(); ++x) {
+        result.push_back((*x)->box_clone());
+    }
+    return result;
+}
 
 }
 
