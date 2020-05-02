@@ -17,8 +17,37 @@ namespace impl {
 struct NodeData;
 typedef struct NodeData NodeData;
 
-struct SodiumCtx;
-typedef struct SodiumCtx SodiumCtx;
+struct Node;
+typedef struct Node Node;
+
+struct WeakNode;
+typedef struct WeakNode WeakNode;
+
+class IsWeakNode;
+
+class IsNode {
+public:
+    virtual ~IsNode() {}
+
+    virtual Node node() = 0;
+
+    virtual std::unique_ptr<IsNode> box_clone() = 0;
+
+    virtual std::unique_ptr<IsWeakNode> downgrade() = 0;
+
+    GcNode gc_node();
+};
+
+class IsWeakNode {
+public:
+    virtual ~IsWeakNode() {}
+
+    virtual WeakNode node() = 0;
+
+    virtual std::unique_ptr<IsWeakNode> box_clone() = 0;
+
+    virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() = 0;
+};
 
 typedef struct Node: public IsNode {
 public:
@@ -137,11 +166,12 @@ public:
         return std::unique_ptr<IsNode>(node);
     }
 
-    virtual std::unique_ptr<IsWeakNode> downgrade() {
-        WeakNode* node = new WeakNode(this->data, this->gc_node, this->sodium_ctx);
-        return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);
-    }
+    virtual std::unique_ptr<IsWeakNode> downgrade();
 } Node;
+
+GcNode IsNode::gc_node() {
+    return this->node().gc_node;
+}
 
 typedef struct NodeData {
     bool visited;
@@ -183,6 +213,7 @@ typedef struct WeakNode: public IsWeakNode {
     virtual nonstd::optional<Node> upgrade2() {
         std::shared_ptr<NodeData> data = this->data.lock();
         if (data) {
+            this->gc_node.inc_ref();
             return nonstd::optional<Node>(Node(data, this->gc_node, this->sodium_ctx));
         } else {
             return nonstd::nullopt;
@@ -190,33 +221,10 @@ typedef struct WeakNode: public IsWeakNode {
     }
 } WeakNode;
 
-class IsWeakNode;
-
-class IsNode {
-public:
-    virtual ~IsNode() {}
-
-    virtual Node node() = 0;
-
-    virtual std::unique_ptr<IsNode> box_clone() = 0;
-
-    virtual std::unique_ptr<IsWeakNode> downgrade() = 0;
-
-    GcNode gc_node() {
-        return this->node().gc_node;
-    }
-};
-
-class IsWeakNode {
-public:
-    virtual ~IsWeakNode() {}
-
-    virtual WeakNode node() = 0;
-
-    virtual std::unique_ptr<IsWeakNode> box_clone() = 0;
-
-    virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() = 0;
-};
+std::unique_ptr<IsWeakNode> Node::downgrade() {
+    WeakNode* node = new WeakNode(this->data, this->gc_node, this->sodium_ctx);
+    return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);
+}
 
 std::vector<std::unique_ptr<IsNode>> box_clone_vec_is_node(std::vector<std::unique_ptr<IsNode>>& xs) {
     std::vector<std::unique_ptr<IsNode>> result;

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "impl/sodium_ctx.h"
 #include "impl/gc_node.h"
 
 int main() {
