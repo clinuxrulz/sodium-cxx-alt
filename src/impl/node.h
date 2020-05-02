@@ -2,6 +2,7 @@
 #define __SODIUM_CXX_IMPL_NODE_H__
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "optional.h"
@@ -23,6 +24,9 @@ typedef struct Node: public IsNode {
     std::shared_ptr<NodeData> data;
     GcNode gc_node;
     SodiumCtx sodium_ctx;
+
+    template <typename UPDATE>
+    Node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies);
 
     Node(Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
         node.gc_node.inc_ref();
@@ -46,7 +50,7 @@ typedef struct Node: public IsNode {
 
     virtual std::unique_ptr<IsWeakNode> downgrade() {
         WeakNode* node = new WeakNode(this->data, this->gc_node, this->sodium_ctx);
-        return std::unique_ptr<IsWeakNode>(node);
+        return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);
     }
 } Node;
 
@@ -81,7 +85,7 @@ typedef struct WeakNode: public IsWeakNode {
     virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() {
         auto node_op = this->upgrade2();
         if (node_op) {
-            return nonstd::optional<std::unique_ptr<IsNode>>(new Node(*node_op));
+            return nonstd::optional<std::unique_ptr<IsNode>>(std::unique_ptr<IsNode>((IsNode*)new Node(*node_op)));
         } else {
             return nonstd::nullopt;
         }
