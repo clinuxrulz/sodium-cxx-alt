@@ -2,6 +2,7 @@
 #define __SODIUM_CXX_IMPL_SODIUM_CTX_H__
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "impl/gc_node.h"
@@ -17,6 +18,8 @@ typedef struct Node Node;
 struct SodiumCtxData;
 typedef struct SodiumCtxData SodiumCtxData;
 
+class IsNode;
+
 typedef struct SodiumCtx {
     std::shared_ptr<SodiumCtxData> data;
     std::shared_ptr<unsigned int> node_count;
@@ -27,7 +30,32 @@ typedef struct SodiumCtx {
     GcCtx gc_ctx();
 
     Node null_node();
-    
+
+    template<typename K>
+    typename std::result_of<K()>::type transaction(K k) {
+        typedef typename std::result_of<K()>::type R;
+        this->data->transaction_depth = this->data->transaction_depth + 1;
+        R result = k();
+        this->data->transaction_depth = this->data->transaction_depth - 1;
+        if (this->data->transaction_depth == 0) {
+            this->end_of_transaction();
+        }
+        return result;
+    }
+
+    template<typename K>
+    void transaction_void(K k) {
+        this->transaction([k]() { k(); return 0; });
+    }
+
+    void add_dependents_to_changed_nodes(IsNode& node);
+
+    void end_of_transaction();
+
+    void update_node(Node& node);
+
+    void collect_cycles();
+
 } SodiumCtx;
 
 }
