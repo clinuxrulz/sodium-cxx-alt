@@ -27,7 +27,7 @@ public:
     SodiumCtx sodium_ctx;
 
     template <typename UPDATE>
-    Node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies) {
+    static Node mk_node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies) {
         std::shared_ptr<std::vector<std::weak_ptr<NodeData>>> forward_ref = std::shared_ptr<std::vector<std::weak_ptr<NodeData>>>(new std::vector<NodeData>());
         auto deconstructor;
         {
@@ -73,8 +73,48 @@ public:
                 forward_ref2->clear();
             };
         }
-        //forward_ref->push_back();
-        this->sodium_ctx = sodium_ctx;
+        auto trace;
+        {
+            auto forward_ref2 = forward_ref;
+            trace = [forward_ref2](std::function<Tracer> tracer) {
+                std::shared_ptr<NodeData> node_data = (*forward_ref2)[0].lock();
+                {
+                    std::vector<std::unique_ptr<IsNode>>& dependencies = node_data->dependencies;
+                    for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+                        tracer((*dependency)->gc_node());
+                    }
+                }
+                {
+                    std::vector<Dep>& update_dependencies = node_data->update_dependencies;
+                    for (auto update_dependency = update_dependencies.begin(); update_dependency != update_dependencies.end(); ++update_dependency) {
+                        tracer(update_dependency->gc_node());
+                    }
+                }
+                {
+                    std::vector<GcNode>& keep_alive = node_data->keep_alive;
+                    for (auto gc_node = keep_alive.begin(); gc_node != keep_alive.end(); ++gc_node) {
+                        tracer(*gc_node);
+                    }
+                }
+            };
+        }
+        std::shared_ptr<NodeData> node_data;
+        {
+            NodeData* _node_data = new NodeData();
+            _node_data->visited = false;
+            _node_data->changed = false;
+            _node_data->update = update;
+            _node_data->dependencies = box_clone_vec_is_node(dependencies);
+            _node_data->sodium_ctx = sodium_ctx;
+            node_data = std::unique_ptr(_node_data);
+        }
+        Node node(
+            node_data,
+            GcNode(sodium_ctx.gc_ctx(), name, deconstructor, trace),
+            sodium_ctx
+        );
+        forward_ref->push_back(node);
+        return node;
     }
 
     Node(Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
