@@ -5,8 +5,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "impl/gc_node.h"
-#include "impl/listener.h"
+#include "./gc_node.h"
+#include "./listener.h"
 
 namespace sodium {
 
@@ -22,6 +22,7 @@ class IsNode;
 
 typedef struct SodiumCtx {
     std::shared_ptr<SodiumCtxData> data;
+    GcCtx _gc_ctx;
     std::shared_ptr<unsigned int> node_count;
     std::shared_ptr<unsigned int> node_ref_count;
 
@@ -62,7 +63,7 @@ typedef struct SodiumCtx {
 
 }
 
-#include "impl/node.h"
+#include "./node.h"
 
 namespace sodium {
 

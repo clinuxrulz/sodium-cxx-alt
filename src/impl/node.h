@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "optional.h"
-#include "impl/dep.h"
-#include "impl/gc_node.h"
-#include "impl/sodium_ctx.h"
+#include "../optional.h"
+#include "./dep.h"
+#include "./gc_node.h"
+#include "./sodium_ctx.h"
 
 namespace sodium {
 
@@ -57,76 +57,68 @@ public:
 
     template <typename UPDATE>
     static Node mk_node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies) {
-        std::shared_ptr<std::vector<std::weak_ptr<NodeData>>> forward_ref = std::shared_ptr<std::vector<std::weak_ptr<NodeData>>>(new std::vector<NodeData>());
-        auto deconstructor;
-        {
-            auto forward_ref2 = forward_ref;
-            deconstructor = [forward_ref2]() {
-                std::shared_ptr<NodeData> node_data = (*forward_ref2)[0].lock();
-                std::vector<std::unique_ptr<IsNode>> dependencies;
-                dependencies.swap(node_data->dependencies);
-                std::vector<std::unique_ptr<IsWeakNode>> dependents;
-                dependents.swap(node_data->dependents);
-                node_data->update_dependencies.clear();
-                std::vector<GcNode> keep_alive;
-                keep_alive.swap(node_data->keep_alive);
-                node_data->update = std::function<void()>([] {});
-                for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
-                    std::vector<std::unique_ptr<IsWeakNode>>& dependents = (*dependency)->node().data->dependents;
-                    for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-                        std::shared_ptr<IsNode> dependent2 = (*dependent)->node().data.lock();
-                        if (dependent2) {
-                            if (dependent2->node().data == node_data) {
-                                dependents.erase(dependent);
-                                break;
-                            }
-                        }
-                    }
-                }
+        std::shared_ptr<std::vector<std::weak_ptr<NodeData>>> forward_ref = std::shared_ptr<std::vector<std::weak_ptr<NodeData>>>(new std::vector<std::weak_ptr<NodeData>>());
+        auto deconstructor = [forward_ref]() {
+            std::shared_ptr<NodeData> node_data = (*forward_ref)[0].lock();
+            std::vector<std::unique_ptr<IsNode>> dependencies;
+            dependencies.swap(node_data->dependencies);
+            std::vector<std::unique_ptr<IsWeakNode>> dependents;
+            dependents.swap(node_data->dependents);
+            node_data->update_dependencies.clear();
+            std::vector<GcNode> keep_alive;
+            keep_alive.swap(node_data->keep_alive);
+            node_data->update = std::function<void()>([] {});
+            for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+                std::vector<std::unique_ptr<IsWeakNode>>& dependents = (*dependency)->node().data->dependents;
                 for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-                    nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
-                    if (dependent2_op) {
-                        std::unique_ptr<IsNode> dependent2 = *dependent2_op;
-                        std::vector<std::unique_ptr<IsNode>>& dependencies = dependent2->node().data->dependencies;
-                        for (auto dependency = dependencies.begin(); dependency != dependency.end(); ++dependency) {
-                            if ((*dependency)->node().data == node_data) {
-                                dependencies.erase(dependency);
-                                break;
-                            }
+                    std::shared_ptr<NodeData> dependent2 = (*dependent)->node().data.lock();
+                    if (dependent2) {
+                        if (dependent2 == node_data) {
+                            dependents.erase(dependent);
+                            break;
                         }
                     }
                 }
-                for (auto node = keep_alive.begin(); node != keep_alive.end(); ++node) {
-                    node->dec_ref();
-                }
-                forward_ref2->clear();
-            };
-        }
-        auto trace;
-        {
-            auto forward_ref2 = forward_ref;
-            trace = [forward_ref2](std::function<Tracer> tracer) {
-                std::shared_ptr<NodeData> node_data = (*forward_ref2)[0].lock();
-                {
-                    std::vector<std::unique_ptr<IsNode>>& dependencies = node_data->dependencies;
+            }
+            for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
+                nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
+                if (dependent2_op) {
+                    std::unique_ptr<IsNode> dependent2 = std::move(*dependent2_op);
+                    std::vector<std::unique_ptr<IsNode>>& dependencies = dependent2->node().data->dependencies;
                     for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
-                        tracer((*dependency)->gc_node());
+                        if ((*dependency)->node().data == node_data) {
+                            dependencies.erase(dependency);
+                            break;
+                        }
                     }
                 }
-                {
-                    std::vector<Dep>& update_dependencies = node_data->update_dependencies;
-                    for (auto update_dependency = update_dependencies.begin(); update_dependency != update_dependencies.end(); ++update_dependency) {
-                        tracer(update_dependency->gc_node());
-                    }
+            }
+            for (auto node = keep_alive.begin(); node != keep_alive.end(); ++node) {
+                node->dec_ref();
+            }
+            forward_ref->clear();
+        };
+        auto trace = [forward_ref](std::function<Tracer> tracer) {
+            std::shared_ptr<NodeData> node_data = (*forward_ref)[0].lock();
+            {
+                std::vector<std::unique_ptr<IsNode>>& dependencies = node_data->dependencies;
+                for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+                    tracer((*dependency)->gc_node());
                 }
-                {
-                    std::vector<GcNode>& keep_alive = node_data->keep_alive;
-                    for (auto gc_node = keep_alive.begin(); gc_node != keep_alive.end(); ++gc_node) {
-                        tracer(*gc_node);
-                    }
+            }
+            {
+                std::vector<Dep>& update_dependencies = node_data->update_dependencies;
+                for (auto update_dependency = update_dependencies.begin(); update_dependency != update_dependencies.end(); ++update_dependency) {
+                    tracer(update_dependency->gc_node());
                 }
-            };
-        }
+            }
+            {
+                std::vector<GcNode>& keep_alive = node_data->keep_alive;
+                for (auto gc_node = keep_alive.begin(); gc_node != keep_alive.end(); ++gc_node) {
+                    tracer(*gc_node);
+                }
+            }
+        };
         std::shared_ptr<NodeData> node_data;
         {
             NodeData* _node_data = new NodeData();
@@ -135,14 +127,14 @@ public:
             _node_data->update = update;
             _node_data->dependencies = box_clone_vec_is_node(dependencies);
             _node_data->sodium_ctx = sodium_ctx;
-            node_data = std::unique_ptr(_node_data);
+            node_data = std::unique_ptr<NodeData>(_node_data);
         }
         Node node(
             node_data,
             GcNode(sodium_ctx.gc_ctx(), name, deconstructor, trace),
             sodium_ctx
         );
-        forward_ref->push_back(node);
+        forward_ref->push_back(std::weak_ptr<NodeData>(node_data));
         return node;
     }
 
