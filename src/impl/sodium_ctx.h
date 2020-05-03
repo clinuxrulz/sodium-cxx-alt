@@ -32,6 +32,14 @@ typedef struct SodiumCtx {
 
     Node null_node();
 
+    void inc_node_count();
+
+    void dec_node_count();
+
+    void inc_node_ref_count();
+
+    void dec_node_ref_count();
+
     template<typename K>
     typename std::result_of<K()>::type transaction(K k) {
         typedef typename std::result_of<K()>::type R;

@@ -121,12 +121,11 @@ public:
         };
         std::shared_ptr<NodeData> node_data;
         {
-            NodeData* _node_data = new NodeData();
+            NodeData* _node_data = new NodeData(sodium_ctx);
             _node_data->visited = false;
             _node_data->changed = false;
             _node_data->update = update;
             _node_data->dependencies = box_clone_vec_is_node(dependencies);
-            _node_data->sodium_ctx = sodium_ctx;
             node_data = std::unique_ptr<NodeData>(_node_data);
         }
         Node node(
@@ -140,13 +139,17 @@ public:
 
     Node(const Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
         this->gc_node.inc_ref();
+        this->sodium_ctx.inc_node_ref_count();
     }
 
     Node(std::shared_ptr<NodeData> data, GcNode gc_node, SodiumCtx sodium_ctx)
-    : data(data), gc_node(gc_node), sodium_ctx(sodium_ctx) {}
+    : data(data), gc_node(gc_node), sodium_ctx(sodium_ctx) {
+        this->sodium_ctx.inc_node_ref_count();
+    }
 
     virtual ~Node() {
         this->gc_node.dec_ref();
+        this->sodium_ctx.dec_node_ref_count();
     }
 
     virtual Node node() {
@@ -170,6 +173,15 @@ typedef struct NodeData {
     std::vector<std::unique_ptr<IsWeakNode>> dependents;
     std::vector<GcNode> keep_alive;
     SodiumCtx sodium_ctx;
+
+    NodeData(SodiumCtx sodium_ctx): sodium_ctx(sodium_ctx) {
+        this->sodium_ctx.inc_node_count();
+    }
+
+    ~NodeData() {
+        this->sodium_ctx.dec_node_count();
+    }
+
 } NodeData;
 
 typedef struct WeakNode: public IsWeakNode {

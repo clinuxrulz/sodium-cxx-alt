@@ -27,6 +27,26 @@ Node SodiumCtx::null_node() {
     );
 }
 
+void SodiumCtx::inc_node_count() {
+    unsigned int& node_count = *(this->node_count);
+    ++node_count;
+}
+
+void SodiumCtx::dec_node_count() {
+    unsigned int& node_count = *(this->node_count);
+    --node_count;
+}
+
+void SodiumCtx::inc_node_ref_count() {
+    unsigned int& node_ref_count = *(this->node_ref_count);
+    ++node_ref_count;
+}
+
+void SodiumCtx::dec_node_ref_count() {
+    unsigned int& node_ref_count = *(this->node_ref_count);
+    --node_ref_count;
+}
+
 void SodiumCtx::add_dependents_to_changed_nodes(IsNode& node) {
     std::vector<std::unique_ptr<IsWeakNode>>& dependents = node.node().data->dependents;
     for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
