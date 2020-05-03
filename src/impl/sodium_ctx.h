@@ -51,6 +51,16 @@ typedef struct SodiumCtx {
 
     void add_dependents_to_changed_nodes(IsNode& node);
 
+    template<typename K>
+    void pre_post(K k) {
+        this->data->pre_post.push_back(std::function<void()>(k));
+    }
+
+    template<typename K>
+    void post(K k) {
+        this->data->post.push_back(std::function<void()>(k));
+    }
+
     void end_of_transaction();
 
     void update_node(Node& node);
