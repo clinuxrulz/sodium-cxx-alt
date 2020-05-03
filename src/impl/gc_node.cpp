@@ -4,6 +4,12 @@
 
 using namespace sodium::impl;
 
+GcCtx::GcCtx() {
+    GcCtxData* data = new GcCtxData();
+    data->next_id = 0;
+    this->data = std::unique_ptr<GcCtxData>(data);
+}
+
 unsigned int GcCtx::make_id() {
     unsigned int id = this->data->next_id;
     this->data->next_id = this->data->next_id + 1;

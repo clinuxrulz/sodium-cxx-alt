@@ -32,6 +32,8 @@ typedef struct GcCtxData GcCtxData;
 typedef struct GcCtx {
     std::shared_ptr<GcCtxData> data;
 
+    GcCtx();
+
     unsigned int make_id();
 
     void add_possible_root(GcNode& node);
