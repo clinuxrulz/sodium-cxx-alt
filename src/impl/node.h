@@ -138,8 +138,8 @@ public:
         return node;
     }
 
-    Node(Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
-        node.gc_node.inc_ref();
+    Node(const Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
+        this->gc_node.inc_ref();
     }
 
     Node(std::shared_ptr<NodeData> data, GcNode gc_node, SodiumCtx sodium_ctx)

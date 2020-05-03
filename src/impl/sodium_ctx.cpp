@@ -66,7 +66,38 @@ void SodiumCtx::end_of_transaction() {
 }
 
 void SodiumCtx::update_node(Node& node) {
-    // TODO
+    if (node.data->visited) {
+        return;
+    }
+    node.data->visited = true;
+    std::vector<std::unique_ptr<IsNode>> dependencies = box_clone_vec_is_node(node.data->dependencies);
+    {
+        Node node2 = node;
+        this->pre_post([node2]() {
+            node2.data->visited = false;
+        });
+    }
+    bool any_changed = false;
+    for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+        Node dependency2 = (*dependency)->node();
+        if (!dependency2.data->visited) {
+            this->update_node(dependency2);
+            any_changed |= dependency2.data->changed;
+        }
+    }
+    if (any_changed) {
+        (node.data->update)();
+    }
+    if (node.data->changed) {
+        std::vector<std::unique_ptr<IsWeakNode>> dependents = box_clone_vec_is_weak_node(node.data->dependents);
+        for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
+            nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
+            if (dependent2_op) {
+                std::unique_ptr<IsNode> dependent2 = std::move(*dependent2_op);
+                this->update_node(dependent2->node());
+            }
+        }
+    }
 }
 
 void SodiumCtx::collect_cycles() {
