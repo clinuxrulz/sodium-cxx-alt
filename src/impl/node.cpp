@@ -13,6 +13,9 @@ std::unique_ptr<IsWeakNode> Node::downgrade() {
     return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);
 }
 
+WeakNode Node::downgrade2() {
+    return WeakNode(this->data, this->gc_node, this->sodium_ctx);
+}
 
 std::vector<std::unique_ptr<IsNode>> box_clone_vec_is_node(std::vector<std::unique_ptr<IsNode>>& xs) {
     std::vector<std::unique_ptr<IsNode>> result;

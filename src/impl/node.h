@@ -162,6 +162,8 @@ public:
     }
 
     virtual std::unique_ptr<IsWeakNode> downgrade();
+
+    WeakNode downgrade2();
 } Node;
 
 typedef struct NodeData {
