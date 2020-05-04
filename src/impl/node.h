@@ -137,6 +137,13 @@ public:
         return node;
     }
 
+    template <typename UPDATE>
+    Node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies)
+    : Node(Node::mk_node(sodium_ctx, name, update, dependencies))
+    {
+    }
+
+
     Node(const Node& node): data(node.data), gc_node(node.gc_node), sodium_ctx(node.sodium_ctx) {
         this->gc_node.inc_ref();
         this->sodium_ctx.inc_node_ref_count();

@@ -45,6 +45,13 @@ public:
     {
     }
 
+    template <typename COALESCER>
+    Stream(SodiumCtx& sodium_ctx, COALESCER coalescer)
+    : Stream(sodium_ctx)
+    {
+        this->data->coalescer_op = nonstd::optional<std::function<A(A&,A&)>>(coalescer);
+    }
+
     template <typename MK_NODE>
     static Stream<A> mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node);
 
@@ -60,9 +67,16 @@ public:
         return std::unique_ptr<IsWeakNode>(new WeakStream<A>(this->data, this->_node.downgrade2()));
     }
 
+    SodiumCtx& sodium_ctx() const {
+        return this->_node->sodium_ctx;
+    }
+
     WeakStream<A> downgrade2() {
         return WeakStream<A>(this->data, this->_node.downgrade2());
     }
+
+    template <typename FN>
+    Stream<typename std::result_of<FN(A&)>::type> map(FN f);
 };
 
 template <typename A>
@@ -129,6 +143,10 @@ public:
     Stream<A>& operator*() const {
         return (*(this->data))[0];
     }
+
+    Stream<A>& operator->() const {
+        return *this;
+    }
 };
 
 
@@ -156,6 +174,30 @@ Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
         s._node.data->changed = false;
     });
     return s;
+}
+
+template <typename A>
+template <typename FN>
+Stream<typename std::result_of<FN(A&)>::type> Stream<A>::map(FN fn) {
+    Stream<A> this_ = *this;
+    return Stream::mkStream(
+        this->sodium_ctx(),
+        [this_, fn](StreamWeakForwardRef<A> s) {
+            std::vector<std::unique_ptr<IsNode>> dependencies;
+            dependencies.push_back(this_.box_clone());
+            return Node::mk_node(
+                this_.sodium_ctx(),
+                "Stream::map",
+                [this_, s, fn]() {
+                    nonstd::optional<A>& firing_op = this_.data->firing_op;
+                    if (firing_op) {
+                        s->_send(fn(*firing_op));
+                    }
+                },
+                dependencies
+            );
+        }
+    );
 }
 
 }
