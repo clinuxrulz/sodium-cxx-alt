@@ -14,7 +14,7 @@ class StreamData {
 public:
     nonstd::optional<A> firing_op;
     SodiumCtx sodium_ctx;
-    nonstd::optional<std::function<A(A&,A&)>> coalescer_op;
+    nonstd::optional<std::function<A(const A&,const A&)>> coalescer_op;
 };
 
 template <typename A>
@@ -68,7 +68,7 @@ public:
     }
 
     SodiumCtx& sodium_ctx() const {
-        return this->_node->sodium_ctx;
+        return this->_node.data->sodium_ctx;
     }
 
     WeakStream<A> downgrade2() {
@@ -77,6 +77,31 @@ public:
 
     template <typename FN>
     Stream<typename std::result_of<FN(A&)>::type> map(FN f);
+
+    void _send(A a) {
+        SodiumCtx sodium_ctx = this->sodium_ctx();
+        sodium_ctx.transaction_void([this, sodium_ctx, a]() mutable {
+            bool is_first = !(bool)this->data->firing_op;
+            if (this->data->coalescer_op) {
+                std::function<A(const A&, const A&)>& coalescer = *this->data->coalescer_op;
+                if (this->data->firing_op) {
+                    A& firing = *this->data->firing_op;
+                    this->data->firing_op = nonstd::optional<A>(coalescer(firing, a));
+                } else {
+                    this->data->firing_op = nonstd::optional<A>(a);
+                }
+            } else {
+                this->data->firing_op = nonstd::optional<A>(a);
+            }
+            this->node().data->changed = true;
+            if (is_first) {
+                sodium_ctx.pre_post([this]() {
+                    this->data->firing_op = nonstd::nullopt;
+                    this->node().data->changed = false;
+                });
+            }
+        });
+    }
 };
 
 template <typename A>
@@ -115,8 +140,10 @@ public:
 
     nonstd::optional<Stream<A>> upgrade2() {
         std::shared_ptr<StreamData<A>> data = this->data.lock();
-        if (data) {
-            return nonstd::optional<Stream<A>>(new Stream<A>(data, node));
+        nonstd::optional<Node> node_op = this->_node.upgrade2();
+        if (data && node_op) {
+            Node node = *node_op;
+            return nonstd::optional<Stream<A>>(Stream<A>(data, node));
         } else {
             return nonstd::nullopt;
         }
@@ -140,12 +167,10 @@ public:
         return *this;
     }
 
-    Stream<A>& operator*() const {
-        return (*(this->data))[0];
-    }
-
-    Stream<A>& operator->() const {
-        return *this;
+    Stream<A> unwrap() const {
+        WeakStream<A>& s = (*(this->data))[0];
+        nonstd::optional<Stream<A>> s2 = s.upgrade2();
+        return *s2;
     }
 };
 
@@ -191,10 +216,10 @@ Stream<typename std::result_of<FN(A&)>::type> Stream<A>::map(FN fn) {
                 [this_, s, fn]() {
                     nonstd::optional<A>& firing_op = this_.data->firing_op;
                     if (firing_op) {
-                        s->_send(fn(*firing_op));
+                        s.unwrap()._send(fn(*firing_op));
                     }
                 },
-                dependencies
+                std::move(dependencies)
             );
         }
     );

@@ -54,7 +54,7 @@ typedef struct SodiumCtx {
 
     template<typename K>
     void transaction_void(K k) {
-        this->transaction([k]() { k(); return 0; });
+        this->transaction([k]() mutable { k(); return 0; });
     }
 
     void add_dependents_to_changed_nodes(IsNode& node);
