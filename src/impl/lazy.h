@@ -27,7 +27,7 @@ public:
         this->data = std::unique_ptr<LazyData<A>>(data);
     }
 
-    static Lazy<A> pure(A a) {
+    static Lazy<A> of_value(A a) {
         return Lazy([a]() { return a; });
     }
 
