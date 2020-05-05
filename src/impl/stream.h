@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "impl/lazy.h"
 #include "impl/node.h"
 
 namespace sodium {
@@ -25,9 +26,6 @@ class StreamWeakForwardRef;
 
 template <typename A>
 class Cell;
-
-template <typename A>
-class Lazy;
 
 class Listener;
 
