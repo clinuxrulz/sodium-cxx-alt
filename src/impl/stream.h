@@ -76,7 +76,7 @@ public:
     }
 
     template <typename FN>
-    Stream<typename std::result_of<FN(A&)>::type> map(FN f);
+    Stream<typename std::result_of<FN(const A&)>::type> map(FN f);
 
     void _send(A a) {
         SodiumCtx sodium_ctx = this->sodium_ctx();
@@ -202,7 +202,7 @@ Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
 
 template <typename A>
 template <typename FN>
-Stream<typename std::result_of<FN(A&)>::type> Stream<A>::map(FN fn) {
+Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) {
     Stream<A> this_ = *this;
     return Stream::mkStream(
         this->sodium_ctx(),
