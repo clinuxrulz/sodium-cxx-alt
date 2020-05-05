@@ -31,7 +31,7 @@ public:
 
     virtual Node node() = 0;
 
-    virtual std::unique_ptr<IsNode> box_clone() = 0;
+    virtual std::unique_ptr<IsNode> box_clone() const = 0;
 
     virtual std::unique_ptr<IsWeakNode> downgrade() = 0;
 
@@ -163,7 +163,7 @@ public:
         return *this;
     }
 
-    virtual std::unique_ptr<IsNode> box_clone() {
+    virtual std::unique_ptr<IsNode> box_clone() const {
         Node* node = new Node(*this);
         return std::unique_ptr<IsNode>(node);
     }

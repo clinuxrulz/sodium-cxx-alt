@@ -59,7 +59,7 @@ public:
         return this->_node;
     }
 
-    virtual std::unique_ptr<IsNode> box_clone() {
+    virtual std::unique_ptr<IsNode> box_clone() const {
         return std::unique_ptr<IsNode>(new Stream<A>(*this));
     }
 
