@@ -174,7 +174,6 @@ public:
     }
 };
 
-
 template <typename A>
 template <typename MK_NODE>
 Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
