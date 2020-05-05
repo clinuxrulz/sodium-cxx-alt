@@ -3,8 +3,18 @@
 #include "impl/sodium_ctx.h"
 #include "impl/stream.h"
 #include "impl/gc_node.h"
+#include "impl/lazy.h"
+
+struct TestStruct {
+    int a;
+    int b;
+};
 
 int main() {
+    sodium::impl::Lazy<int> a([]() { return 1; });
+    const int& b = *a;
+    sodium::impl::Lazy<TestStruct> c([]() { return TestStruct(); });
+    int d = c->b;
     sodium::impl::SodiumCtx sodium_ctx;
     sodium::impl::Stream<int> s(sodium_ctx);
     auto s2 = s.map([](const int& x) { return x + 1; });
