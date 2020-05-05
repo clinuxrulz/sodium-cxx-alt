@@ -5,12 +5,13 @@
 #include <type_traits>
 #include <vector>
 
-#include "./gc_node.h"
-#include "./listener.h"
+#include "impl/gc_node.h"
 
 namespace sodium {
 
 namespace impl {
+
+class Listener;
 
 struct Node;
 typedef struct Node Node;
@@ -75,13 +76,18 @@ typedef struct SodiumCtx {
 
     void collect_cycles();
 
+    void add_listener_to_keep_alive(Listener& l);
+
+    void remove_listener_from_keep_alive(Listener& l);
+
 } SodiumCtx;
 
 }
 
 }
 
-#include "./node.h"
+#include "impl/listener.h"
+#include "impl/node.h"
 
 namespace sodium {
 
@@ -96,6 +102,21 @@ struct SodiumCtxData {
     std::vector<Listener> keep_alive;
     unsigned int allow_collect_cycles_counter;
 };
+
+void SodiumCtx::add_listener_to_keep_alive(Listener& l) {
+    this->data->keep_alive.push_back(l);
+}
+
+void SodiumCtx::remove_listener_from_keep_alive(Listener& l) {
+    std::vector<Listener>& keep_alive = this->data->keep_alive;
+    for (auto l2 = keep_alive.begin(); l2 != keep_alive.end(); ++l2) {
+        if (l2->data == l.data) {
+            keep_alive.erase(l2);
+            break;
+        }
+    }
+
+}
 
 }
 
