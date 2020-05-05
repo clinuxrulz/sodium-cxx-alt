@@ -24,6 +24,14 @@ template <typename A>
 class StreamWeakForwardRef;
 
 template <typename A>
+class Cell;
+
+template <typename A>
+class Lazy;
+
+class Listener;
+
+template <typename A>
 class Stream: public IsNode {
 public:
     std::shared_ptr<StreamData<A>> data;
@@ -75,8 +83,40 @@ public:
         return WeakStream<A>(this->data, this->_node.downgrade2());
     }
 
+    template <typename B, typename FN>
+    Stream<typename std::result_of<FN(const A&, const B&)>> snapshot(Cell<B>& cb, FN fn) const;
+
     template <typename FN>
     Stream<typename std::result_of<FN(const A&)>::type> map(FN f) const;
+
+    template <typename PRED>
+    Stream<A> filter(PRED pred) const;
+
+    Stream<A> or_else(Stream<A>& s2) const;
+
+    template <typename FN>
+    Stream<A> merge(Stream<A>& s2, FN fn) const;
+
+    Cell<A> hold_lazy(Lazy<A> a) const;
+
+    template <typename B, typename S, typename FN>
+    Stream<B> collect_lazy(Lazy<S> init_state, FN fn) const;
+
+    template <typename S, typename FN>
+    Cell<S> accum_lazy(Lazy<S> init_state, FN fn) const;
+
+    Stream<A> defer() const;
+
+    Stream<A> once() const;
+
+    template <typename K>
+    Listener _listen(K k, bool weak) const;
+
+    template <typename K>
+    Listener listen_weak(K k) const;
+
+    template <typename K>
+    Listener listen(K k) const;
 
     void _send(A a) {
         SodiumCtx sodium_ctx = this->sodium_ctx();
