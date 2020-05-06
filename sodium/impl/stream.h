@@ -3,8 +3,8 @@
 
 #include <functional>
 
-#include "impl/lazy.h"
-#include "impl/node.h"
+#include "sodium/impl/lazy.h"
+#include "sodium/impl/node.h"
 
 namespace sodium {
 

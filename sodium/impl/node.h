@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "optional.h"
-#include "impl/dep.h"
-#include "impl/gc_node.h"
-#include "impl/sodium_ctx.h"
+#include "sodium/optional.h"
+#include "sodium/impl/dep.h"
+#include "sodium/impl/gc_node.h"
+#include "sodium/impl/sodium_ctx.h"
 
 namespace sodium {
 

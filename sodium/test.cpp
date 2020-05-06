@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "impl/sodium_ctx.h"
-#include "impl/stream.h"
-#include "impl/gc_node.h"
-#include "impl/lazy.h"
+#include "sodium/impl/sodium_ctx.h"
+#include "sodium/impl/stream.h"
+#include "sodium/impl/gc_node.h"
+#include "sodium/impl/lazy.h"
 
 struct TestStruct {
     int a;

@@ -1,4 +1,4 @@
-#include "./gc_node.h"
+#include "sodium/impl/gc_node.h"
 
 #include <algorithm>
 

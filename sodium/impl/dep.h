@@ -1,7 +1,7 @@
 #ifndef __SODIUM_CXX_IMPL_DEP_H__
 #define __SODIUM_CXX_IMPL_DEP_H__
 
-#include "impl/gc_node.h"
+#include "sodium/impl/gc_node.h"
 
 namespace sodium {
 

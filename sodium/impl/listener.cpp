@@ -1,43 +1,11 @@
-#ifndef __SODIUM_CXX_IMPL_LISTENER_H__
-#define __SODIUM_CXX_IMPL_LISTENER_H__
-
-#include <memory>
-#include "optional.h"
-#include "impl/gc_node.h"
+#include "sodium/impl/listener.h"
+#include "sodium/impl/node.h"
+#include "sodium/impl/sodium_ctx.h"
 
 namespace sodium {
 
 namespace impl {
 
-struct ListenerData;
-typedef struct ListenerData ListenerData;
-
-struct SodiumCtx;
-typedef struct SodiumCtx SodiumCtx;
-
-class Node;
-
-typedef struct Listener {
-    std::shared_ptr<ListenerData> data;
-    GcNode gc_node;
-
-    Listener(std::shared_ptr<ListenerData> data, GcNode gc_node): data(data), gc_node(gc_node) {}
-
-    static Listener mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node);
-
-    void unlisten();
-} Listener;
-
-}
-
-}
-
-#include "impl/sodium_ctx.h"
-#include "impl/node.h"
-
-namespace sodium {
-
-namespace impl {
 
 struct ListenerData {
     SodiumCtx sodium_ctx;
@@ -59,8 +27,8 @@ Listener Listener::mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node) {
     };
     auto gc_node_trace = [listener_data](std::function<Tracer>& tracer) {
         if (listener_data->node_op) {
-            Node& node = *listener_data->node_op;
-            tracer(node.gc_node);
+            IsNode& node = *listener_data->node_op;
+            tracer(node.gc_node());
         }
     };
     Listener listener(
@@ -89,5 +57,3 @@ void Listener::unlisten() {
 }
 
 }
-
-#endif // __SODIUM_CXX_IMPL_LISTENER_H__

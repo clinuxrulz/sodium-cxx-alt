@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <memory>
-#include "optional.h"
+#include "sodium/optional.h"
 
 namespace sodium {
 

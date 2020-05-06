@@ -1,4 +1,4 @@
-#include "./node.h"
+#include "sodium/impl/node.h"
 
 namespace sodium {
 
