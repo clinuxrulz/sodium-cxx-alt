@@ -19,14 +19,15 @@ public:
 
 template <typename FN>
 class Lambda1: public Lambda<FN> {
+public:
     Lambda1(FN fn): Lambda(fn) {}
 
     template <typename A>
-    std::result_of<FN(const A&)> operator()(const A& a) const {
+    typename std::result_of<FN(const A&)>::type operator()(const A& a) const {
         return fn(a);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda1<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -38,11 +39,11 @@ class Lambda2: public Lambda<FN> {
     Lambda2(FN fn): Lambda(fn) {}
 
     template <typename A, typename B>
-    std::result_of<FN(const A&, const B&)> operator()(const A& a, const B& b) const {
+    typename std::result_of<FN(const A&, const B&)>::type operator()(const A& a, const B& b) const {
         return fn(a, b);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda2<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -53,11 +54,11 @@ class Lambda3: public Lambda<FN> {
     Lambda3(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C>
-    std::result_of<FN(const A&, const B&, const C&)> operator()(const A& a, const B& b, const C& c) const {
+    typename std::result_of<FN(const A&, const B&, const C&)>::type operator()(const A& a, const B& b, const C& c) const {
         return fn(a, b, c);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda3<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -68,11 +69,11 @@ class Lambda4: public Lambda<FN> {
     Lambda4(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C, typename D>
-    std::result_of<FN(const A&, const B&, const C&, const D&)> operator()(const A& a, const B& b, const C& c, const D& d) const {
+    typename std::result_of<FN(const A&, const B&, const C&, const D&)>::type operator()(const A& a, const B& b, const C& c, const D& d) const {
         return fn(a, b, c, d);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda4<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -83,11 +84,11 @@ class Lambda5: public Lambda<FN> {
     Lambda5(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C, typename D, typename E>
-    std::result_of<FN(const A&, const B&, const C&, const D&, const E&)> operator()(const A& a, const B& b, const C& c, const D& d, const E& e) const {
+    typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&)>::type operator()(const A& a, const B& b, const C& c, const D& d, const E& e) const {
         return fn(a, b, c, d, e);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda5<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -100,11 +101,11 @@ public:
     Lambda6(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C, typename D, typename E, typename F>
-    std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)> operator()(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f) const {
+    typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>::type operator()(const A& a, const B& b, const C& c, const D& d, const E& e, const F& f) const {
         return fn(a, b, c, d, e, f);
     }
 
-    Lambda1& operator<<(Dep dep) {
+    Lambda6<FN>& operator<<(Dep dep) {
         this->deps.push(dep);
         return *this;
     }
@@ -191,15 +192,15 @@ Lambda6<FN> lambda6(FN fn) {
 
 template<typename FN>
 struct GetDeps {
-    std::vector<Dep> operator()() const {
+    static std::vector<Dep> call(FN fn) {
         return std::vector<Dep>();
     }
 };
 
 template<typename FN>
 struct GetDeps<Lambda<FN>> {
-    std::vector<Dep> operator()() const {
-        return this->deps;
+    static std::vector<Dep> call(FN fn) {
+        return fn.deps;
     }
 };
 

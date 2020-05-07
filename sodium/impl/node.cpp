@@ -8,6 +8,12 @@ GcNode IsNode::gc_node() {
     return this->node().gc_node;
 }
 
+void Node::add_update_dependencies(std::vector<Dep> update_dependencies) {
+    for (auto update_dependency = update_dependencies.begin(); update_dependency != update_dependencies.end(); ++update_dependency) {
+        this->data->update_dependencies.push_back(*update_dependency);
+    }
+}
+
 std::unique_ptr<IsWeakNode> Node::downgrade() {
     WeakNode* node = new WeakNode(this->data, this->gc_node, this->sodium_ctx);
     return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);

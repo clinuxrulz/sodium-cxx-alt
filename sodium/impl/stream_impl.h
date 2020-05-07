@@ -1,6 +1,7 @@
 #ifndef __SODIUM_IMPL_STREAM_IMPL_H__
 #define __SODIUM_IMPL_STREAM_IMPL_H__
 
+#include "sodium/impl/lambda.h"
 #include "sodium/impl/stream.h"
 
 namespace sodium {
@@ -40,9 +41,10 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
     return Stream::mkStream(
         this->sodium_ctx(),
         [this_, fn](StreamWeakForwardRef<A> s) {
+            std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
             std::vector<std::unique_ptr<IsNode>> dependencies;
             dependencies.push_back(this_.box_clone());
-            return Node::mk_node(
+            Node node = Node::mk_node(
                 this_.sodium_ctx(),
                 "Stream::map",
                 [this_, s, fn]() {
@@ -53,6 +55,8 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
                 },
                 std::move(dependencies)
             );
+            node.add_update_dependencies(fn_deps);
+            return node;
         }
     );
 }
