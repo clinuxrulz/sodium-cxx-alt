@@ -1,7 +1,7 @@
 #include <iostream>
 
+#include "sodium/sodium.h"
 #include "sodium/impl/sodium_ctx.h"
-#include "sodium/impl/stream.h"
 #include "sodium/impl/gc_node.h"
 #include "sodium/impl/lazy.h"
 
