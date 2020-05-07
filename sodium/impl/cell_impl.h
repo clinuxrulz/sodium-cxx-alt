@@ -36,13 +36,6 @@ Cell<A> CellWeakForwardRef<A>::unwrap() const {
     return *c1.upgrade();
 }
 
-/*
-    CellWeakForwardRef<A>& operator=(Cell<A>& rhs);
-
-    Cell<A> unwrap() const;
-
-*/
-
 }
 
 }
