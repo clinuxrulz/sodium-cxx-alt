@@ -19,14 +19,14 @@ public:
 
 template<typename LAMBDA>
 struct GetDeps {
-    std::vector<Dep> operator() const {
+    std::vector<Dep> operator()() const {
         return std::vector<Dep>();
     }
 };
 
 template<typename FN>
 struct GetDeps<Lambda<FN>> {
-    std::vector<Dep> operator() const {
+    std::vector<Dep> operator()() const {
         return this->deps;
     }
 };
