@@ -28,7 +28,7 @@ public:
     }
 
     Lambda1<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
@@ -44,7 +44,7 @@ class Lambda2: public Lambda<FN> {
     }
 
     Lambda2<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
@@ -59,7 +59,7 @@ class Lambda3: public Lambda<FN> {
     }
 
     Lambda3<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
@@ -74,7 +74,7 @@ class Lambda4: public Lambda<FN> {
     }
 
     Lambda4<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
@@ -89,7 +89,7 @@ class Lambda5: public Lambda<FN> {
     }
 
     Lambda5<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
@@ -106,7 +106,7 @@ public:
     }
 
     Lambda6<FN>& operator<<(Dep dep) {
-        this->deps.push(dep);
+        this->deps.push_back(dep);
         return *this;
     }
 };
