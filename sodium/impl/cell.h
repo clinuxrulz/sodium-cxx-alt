@@ -2,6 +2,7 @@
 #define __SODIUM_IMPL_CELL_H__
 
 #include "sodium/optional.h"
+#include "sodium/impl/node.h"
 
 #include <memory>
 #include <vector>
@@ -9,8 +10,6 @@
 namespace sodium {
 
 namespace impl {
-
-typedef struct Node Node;
 
 typedef struct WeakNode WeakNode;
 
@@ -30,7 +29,6 @@ class Stream;
 template <typename A>
 class Lazy;
 
-struct Listener;
 typedef struct Listener Listener;
 
 template <typename A>
