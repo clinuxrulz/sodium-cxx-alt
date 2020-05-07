@@ -30,6 +30,9 @@ class Stream;
 template <typename A>
 class Lazy;
 
+struct Listener;
+typedef struct Listener Listener;
+
 template <typename A>
 class Cell {
 public:
@@ -75,6 +78,12 @@ public:
     static Cell<A> switch_s(const Cell<Stream<A>>& csa);
 
     static Cell<A> switch_c(const Cell<Cell<A>>& cca);
+
+    template <typename K>
+    Listener listen_weak(K k) const;
+
+    template <typename K>
+    Listener listen(K k) const;
 };
 
 template <typename A>
