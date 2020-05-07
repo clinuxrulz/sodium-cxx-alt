@@ -73,6 +73,10 @@ public:
         return std::unique_ptr<IsWeakNode>(new WeakStream<A>(this->data, this->_node.downgrade2()));
     }
 
+    Dep to_dep() const {
+        return Dep(this->_node.gc_node);
+    }
+
     SodiumCtx& sodium_ctx() const {
         return this->_node.data->sodium_ctx;
     }
