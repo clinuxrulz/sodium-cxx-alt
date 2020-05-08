@@ -45,10 +45,11 @@ Stream<typename std::result_of<FN(const A&, const B&)>> Stream<A>::snapshot(Cell
 template <typename A>
 template <typename FN>
 Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const {
+    typedef typename std::result_of<FN(const A&)>::type R;
     Stream<A> this_ = *this;
     return Stream::mkStream(
         this->sodium_ctx(),
-        [this_, fn](StreamWeakForwardRef<A> s) {
+        [this_, fn](StreamWeakForwardRef<R> s) {
             std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
             std::vector<std::unique_ptr<IsNode>> dependencies;
             dependencies.push_back(this_.box_clone());
@@ -68,6 +69,19 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
         }
     );
 }
+
+/*
+template <typename A>
+template <typename PRED>
+Stream<A> Stream<A>::filter(PRED pred) const {
+    Stream<A> this_ = *this;
+    return Stream::mkStream(
+        this->sodium_ctx(),
+        [this_, pred](StreamWeakForwardRef<A> s) {
+
+        }
+    );
+}*/
 
 }
 
