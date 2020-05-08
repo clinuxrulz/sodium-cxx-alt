@@ -86,7 +86,7 @@ public:
     }
 
     template <typename B, typename FN>
-    Stream<typename std::result_of<FN(const A&, const B&)>> snapshot(Cell<B>& cb, FN fn) const;
+    Stream<typename std::result_of<FN(const A&, const B&)>> snapshot(const Cell<B>& cb, FN fn) const;
 
     template <typename FN>
     Stream<typename std::result_of<FN(const A&)>::type> map(FN f) const;
@@ -94,10 +94,10 @@ public:
     template <typename PRED>
     Stream<A> filter(PRED pred) const;
 
-    Stream<A> or_else(Stream<A>& s2) const;
+    Stream<A> or_else(const Stream<A>& s2) const;
 
     template <typename FN>
-    Stream<A> merge(Stream<A>& s2, FN fn) const;
+    Stream<A> merge(const Stream<A>& s2, FN fn) const;
 
     Cell<A> hold_lazy(Lazy<A> a) const;
 
