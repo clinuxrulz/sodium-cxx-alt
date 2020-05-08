@@ -2,6 +2,7 @@
 #define __SODIUM_IMPL_CELL_H__
 
 #include "sodium/optional.h"
+#include "sodium/impl/lazy.h"
 #include "sodium/impl/node.h"
 
 #include <memory>
@@ -39,7 +40,7 @@ public:
 
     Cell(SodiumCtx& sodium_ctx, A value);
 
-    Cell(Stream<A> stream, A value);
+    Cell(Stream<A> stream, Lazy<A> value);
 
     SodiumCtx& sodium_ctx() const;
 

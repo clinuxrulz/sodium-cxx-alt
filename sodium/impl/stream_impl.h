@@ -1,6 +1,7 @@
 #ifndef __SODIUM_IMPL_STREAM_IMPL_H__
 #define __SODIUM_IMPL_STREAM_IMPL_H__
 
+#include "sodium/impl/cell.h"
 #include "sodium/impl/lambda.h"
 #include "sodium/impl/stream.h"
 
@@ -145,6 +146,13 @@ Stream<A> Stream<A>::merge(const Stream<A>& s2, FN fn) const {
             return node;
         }
     );
+}
+
+template <typename A>
+Cell<A> Stream<A>::hold_lazy(Lazy<A> a) const {
+    return this->sodium_ctx().transaction([this]() {
+        return Cell<A>(*this, a);
+    });
 }
 
 }
