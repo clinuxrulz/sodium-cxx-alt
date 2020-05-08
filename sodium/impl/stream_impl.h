@@ -70,7 +70,6 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
     );
 }
 
-/*
 template <typename A>
 template <typename PRED>
 Stream<A> Stream<A>::filter(PRED pred) const {
@@ -78,10 +77,28 @@ Stream<A> Stream<A>::filter(PRED pred) const {
     return Stream::mkStream(
         this->sodium_ctx(),
         [this_, pred](StreamWeakForwardRef<A> s) {
-
+            std::vector<Dep> pred_deps = GetDeps<PRED>::call(pred);
+            std::vector<std::unique_ptr<IsNode>> dependencies;
+            dependencies.push_back(this_.box_clone());
+            Node node = Node::mk_node(
+                this_.sodium_ctx(),
+                "Stream::filter",
+                [this_, s, pred]() {
+                    if (this_.data->firing_op) {
+                        A& firing = *this_.data->firing_op;
+                        if (pred(firing)) {
+                            s.unwrap()._send(firing);
+                        }
+                    }
+                },
+                std::move(dependencies)
+            );
+            node.add_update_dependency(this_.to_dep());
+            node.add_update_dependencies(pred_deps);
+            return node;
         }
     );
-}*/
+}
 
 }
 

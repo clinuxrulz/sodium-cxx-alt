@@ -8,6 +8,10 @@ GcNode IsNode::gc_node() {
     return this->node().gc_node;
 }
 
+void Node::add_update_dependency(Dep update_dependency) {
+    this->data->update_dependencies.push_back(update_dependency);
+}
+
 void Node::add_update_dependencies(std::vector<Dep> update_dependencies) {
     for (auto update_dependency = update_dependencies.begin(); update_dependency != update_dependencies.end(); ++update_dependency) {
         this->data->update_dependencies.push_back(*update_dependency);

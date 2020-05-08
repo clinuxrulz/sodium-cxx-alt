@@ -17,7 +17,9 @@ int main() {
     int d = c->b;
     sodium::impl::SodiumCtx sodium_ctx;
     sodium::impl::Stream<int> s(sodium_ctx);
-    auto s2 = s.map(sodium::impl::lambda1([](const int& x) { return x + 1; }) << s.to_dep());
+    auto s2 = s
+        .map(sodium::impl::lambda1([](const int& x) { return x + 1; }) << s.to_dep())
+        .filter([](const int& x) { return x > 0; });
     sodium_ctx.transaction_void([]() {});
     sodium::impl::GcCtx gc_ctx;
     sodium::impl::GcNode node(gc_ctx, "test_node", []() {}, [](std::function<sodium::impl::Tracer> tracer) {});

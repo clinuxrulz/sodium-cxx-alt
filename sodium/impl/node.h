@@ -159,6 +159,8 @@ public:
         this->sodium_ctx.dec_node_ref_count();
     }
 
+    void add_update_dependency(Dep update_dependency);
+
     void add_update_dependencies(std::vector<Dep> update_dependencies);
 
     virtual Node node() {
