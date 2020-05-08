@@ -61,6 +61,14 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
     );
 }
 
+template <typename A>
+template <typename B, typename FN>
+Stream<typename std::result_of<FN(const A&, const B&)>> Stream<A>::snapshot(Cell<B>& cb, FN fn) const {
+    std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
+    fn_deps.push_back(cb.to_dep());
+    return this->map(lambda1([fn,cb](const A& a) { return fn(a, cb.sample()); }) << fn_deps << cb);
+}
+
 }
 
 }
