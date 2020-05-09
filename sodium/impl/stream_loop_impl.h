@@ -23,10 +23,6 @@ template <typename A>
 StreamLoop<A>::StreamLoop(std::shared_ptr<StreamLoopData<A>> data, GcNode gc_node)
 : data(data), gc_node(gc_node) {}
 
-/*
-    static StreamLoop<A> mkStreamLoop(SodiumCtx& sodium_ctx);
-*/
-
 template <typename A>
 StreamLoop<A> StreamLoop<A>::mkStreamLoop(SodiumCtx& sodium_ctx) {
     std::shared_ptr<StreamLoopData<A>> stream_loop_data;

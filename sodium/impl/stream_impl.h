@@ -171,6 +171,20 @@ Stream<B> Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
     });
 }
 
+template <typename A>
+template <typename S, typename FN>
+Cell<S> Stream<A>::accum_lazy(Lazy<S> init_state, FN fn) const {
+    SodiumCtx sodium_ctx = this->sodium_ctx();
+    Stream<A> sa = *this;
+    return this->sodium_ctx().transaction([sodium_ctx, sa, init_state, fn]() {
+        StreamLoop<S> ssl(sodium_ctx);
+        Cell<S> cs = ssl.stream().hold_lazy(init_state);
+        Stream<S> ss = sa.snapshot(cs, fn);
+        ssl.loop(ss);
+        return cs;
+    });
+}
+
 }
 
 }
