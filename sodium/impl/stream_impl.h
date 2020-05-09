@@ -203,9 +203,40 @@ Stream<A> Stream<A>::defer() const {
     });
 }
 
-/*
-    Stream<A> once() const;
+template <typename A>
+Stream<A> Stream<A>::once() const {
+    Stream<A> this_ = *this;
+    SodiumCtx sodium_ctx = this->sodium_ctx();
+    return Stream::mkStream(
+        this->sodium_ctx(),
+        [sodium_ctx, this_](StreamWeakForwardRef<A> s) {
+            std::vector<std::unique_ptr<IsNode>> dependencies;
+            dependencies.push(this_.box_clone());
+            Node node = Node::mk_node(
+                sodium_ctx,
+                "Stream::once",
+                [sodium_ctx, this_, s]() {
+                    if (this_.data->firing_op) {
+                        A& firing = *this_.data->firing_op;
+                        Stream<A> s2 = s.unwrap();
+                        s2._send(firing);
+                        sodium_ctx.post([s2]() {
+                            std::vector<std::unique_ptr<IsNode>> deps = box_clone_vec_is_node(s2.node().dependencies);
+                            for (auto dep = deps.begin(); dep != deps.end(); ++dep) {
+                                s2.remove_dependency(*dep);
+                            }
+                        });
+                    }
+                },
+                std::move(dependencies)
+            );
+            node.add_update_dependency(this_.to_dep());
+            return node;
+        }
+    );
+}
 
+/*
     template <typename K>
     Listener _listen(K k, bool weak) const;
 
