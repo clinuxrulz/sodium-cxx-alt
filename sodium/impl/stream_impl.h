@@ -3,6 +3,7 @@
 
 #include "sodium/impl/cell.h"
 #include "sodium/impl/lambda.h"
+#include "sodium/impl/listener.h"
 #include "sodium/impl/stream.h"
 
 namespace sodium {
@@ -236,16 +237,40 @@ Stream<A> Stream<A>::once() const {
     );
 }
 
-/*
-    template <typename K>
-    Listener _listen(K k, bool weak) const;
+template <typename A>
+template <typename K>
+Listener Stream<A>::_listen(K k, bool is_weak) const {
+    Stream<A> this_ = *this;
+    std::vector<Dep> k_deps = GetDeps<K>::call(k);
+    std::vector<std::unique_ptr<IsNode>> dependencies;
+    dependencies.push_back(this->box_clone());
+    Node node = Node::mk_node(
+        this->sodium_ctx(),
+        "Stream::listen",
+        [this_, k]() {
+            if (this_.data->firing_op) {
+                A& firing = *this_.data->firing_op;
+                k(firing);
+            }
+        },
+        std::move(dependencies)
+    );
+    node.add_update_dependencies(k_deps);
+    node.add_update_dependency(this_.to_dep());
+    return Listener::mkListener(sodium_ctx, is_weak, node);
+}
 
-    template <typename K>
-    Listener listen_weak(K k) const;
+template <typename A>
+template <typename K>
+Listener Stream<A>::listen_weak(K k) const {
+    return this->_listen(k, true);
+}
 
-    template <typename K>
-    Listener listen(K k) const;
-*/
+template <typename A>
+template <typename K>
+Listener Stream<A>::listen(K k) const {
+    return this->_listen(k, false);
+}
 
 }
 

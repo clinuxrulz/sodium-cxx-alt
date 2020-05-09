@@ -112,7 +112,7 @@ public:
     Stream<A> once() const;
 
     template <typename K>
-    Listener _listen(K k, bool weak) const;
+    Listener _listen(K k, bool is_weak) const;
 
     template <typename K>
     Listener listen_weak(K k) const;
