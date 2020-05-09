@@ -66,6 +66,7 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
                 },
                 std::move(dependencies)
             );
+            node.add_update_dependency(this_.to_dep());
             node.add_update_dependencies(fn_deps);
             return node;
         }
