@@ -155,15 +155,21 @@ Cell<A> Stream<A>::hold_lazy(Lazy<A> a) const {
     });
 }
 
-/*
 template <typename A>
 template <typename B, typename S, typename FN>
 Stream<B> Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
+    SodiumCtx sodium_ctx = this->sodium_ctx();
     Stream<A> sa = *this;
-    return this->sodium_ctx().transaction([sa, init_state, fn]() {
-        StreamLoop<S> ss;
+    return this->sodium_ctx().transaction([sodium_ctx, sa, init_state, fn]() {
+        StreamLoop<S> ssl(sodium_ctx);
+        Cell<S> cs = ss.hold_lazy(init_state);
+        Stream<std::pair<B,S>> sbs = sa.snapshot(cs, f);
+        Stream<B> sb = sbs.map([](const std::pair<B,S> x) { return x.first; });
+        Stream<S> ss = sbs.map([](const std::pair<B,S> x) { return x.second; });
+        ssl.loop(ss);
+        return sb;
     });
-}*/
+}
 
 }
 
