@@ -185,6 +185,37 @@ Cell<S> Stream<A>::accum_lazy(Lazy<S> init_state, FN fn) const {
     });
 }
 
+template <typename A>
+Stream<A> Stream<A>::defer() const {
+    SodiumCtx sodium_ctx = this->sodium_ctx();
+    Stream<A> this_ = *this;
+    return this->sodium_ctx().transaction([sodium_ctx, this_]() {
+        StreamSink<A> ss(sodium_ctx);
+        Stream<A> s = ss.stream();
+        WeakStreamSink<A> weak_ss = ss.downgrade();
+        Listener listener = this_.listen_weak([sodium_ctx, weak_ss](const A& a) {
+            nonstd::optional<StreamSink<A>> ss_op = weak_ss.upgrade();
+            StreamSink<A> ss = *ss_op;
+            sodium_ctx.post([ss, a] { ss.send(a); });
+        });
+        s.node().add_keep_alive(listener.gc_node);
+        return s;
+    });
+}
+
+/*
+    Stream<A> once() const;
+
+    template <typename K>
+    Listener _listen(K k, bool weak) const;
+
+    template <typename K>
+    Listener listen_weak(K k) const;
+
+    template <typename K>
+    Listener listen(K k) const;
+*/
+
 }
 
 }
