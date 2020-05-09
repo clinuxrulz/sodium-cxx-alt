@@ -16,7 +16,9 @@ int main() {
     sodium::impl::Lazy<TestStruct> c([]() { return TestStruct(); });
     int d = c->b;
     sodium::impl::SodiumCtx sodium_ctx;
+    sodium::impl::StreamLoop<int> sl(sodium_ctx);
     sodium::impl::Stream<int> s(sodium_ctx);
+    sl.loop(s);
     auto s2 = s
         .map(sodium::impl::lambda1([](const int& x) { return x + 1; }) << s.to_dep())
         .filter([](const int& x) { return x > 0; })

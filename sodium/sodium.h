@@ -7,6 +7,8 @@
 #include "sodium/impl/lambda.h"
 #include "sodium/impl/stream.h"
 #include "sodium/impl/stream_impl.h"
+#include "sodium/impl/stream_loop.h"
+#include "sodium/impl/stream_loop_impl.h"
 
 namespace sodium {
 

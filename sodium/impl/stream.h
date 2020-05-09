@@ -61,7 +61,7 @@ public:
     template <typename MK_NODE>
     static Stream<A> mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node);
 
-    virtual Node node() {
+    virtual Node node() const {
         return this->_node;
     }
 

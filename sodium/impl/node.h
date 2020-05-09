@@ -29,13 +29,15 @@ class IsNode {
 public:
     virtual ~IsNode() {}
 
-    virtual Node node() = 0;
+    virtual Node node() const = 0;
 
     virtual std::unique_ptr<IsNode> box_clone() const = 0;
 
     virtual std::unique_ptr<IsWeakNode> downgrade() = 0;
 
     GcNode gc_node();
+
+    void add_dependency(const IsNode& dependency);
 };
 
 class IsWeakNode {
@@ -163,7 +165,7 @@ public:
 
     void add_update_dependencies(std::vector<Dep> update_dependencies);
 
-    virtual Node node() {
+    virtual Node node() const {
         return *this;
     }
 

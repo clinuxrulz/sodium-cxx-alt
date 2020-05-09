@@ -8,6 +8,12 @@ GcNode IsNode::gc_node() {
     return this->node().gc_node;
 }
 
+void IsNode::add_dependency(const IsNode& dependency) {
+    this->node().data->dependencies.push_back(dependency.box_clone());
+    dependency.node().data->dependents.push_back(this->downgrade());
+}
+
+
 void Node::add_update_dependency(Dep update_dependency) {
     this->data->update_dependencies.push_back(update_dependency);
 }

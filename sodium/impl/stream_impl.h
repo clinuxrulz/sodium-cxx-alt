@@ -155,6 +155,16 @@ Cell<A> Stream<A>::hold_lazy(Lazy<A> a) const {
     });
 }
 
+/*
+template <typename A>
+template <typename B, typename S, typename FN>
+Stream<B> Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
+    Stream<A> sa = *this;
+    return this->sodium_ctx().transaction([sa, init_state, fn]() {
+        StreamLoop<S> ss;
+    });
+}*/
+
 }
 
 }
