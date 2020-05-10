@@ -9,6 +9,7 @@
 #include "sodium/impl/stream_impl.h"
 #include "sodium/impl/stream_loop.h"
 #include "sodium/impl/stream_loop_impl.h"
+#include "sodium/impl/stream_sink.h"
 
 namespace sodium {
 

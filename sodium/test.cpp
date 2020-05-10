@@ -18,7 +18,9 @@ int main() {
     sodium::impl::SodiumCtx sodium_ctx;
     sodium::impl::StreamLoop<int> sl(sodium_ctx);
     sodium::impl::Stream<int> s(sodium_ctx);
+    sodium::impl::StreamSink<int> ss(sodium_ctx);
     sl.loop(s);
+    ss.send(2);
     auto s2 = s
         .map(sodium::impl::lambda1([](const int& x) { return x + 1; }) << s.to_dep())
         .filter([](const int& x) { return x > 0; })
