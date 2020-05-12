@@ -24,6 +24,7 @@ int main() {
         sodium::impl::CellLoop<int> cl(sodium_ctx);
         sodium::impl::Cell<int> ca(sodium_ctx, 1);
         cl.loop(ca);
+        sodium::impl::Stream<int> s = ca.value();
     });
     sl.loop(s);
     ss.send(2);

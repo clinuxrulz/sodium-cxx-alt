@@ -144,18 +144,18 @@ Stream<A> Cell<A>::updates() const {
 
 template <typename A>
 Stream<A> Cell<A>::value() const {
-    Stream<A> this_ = *this;
+    Cell<A> this_ = *this;
     SodiumCtx sodium_ctx = this->sodium_ctx();
-    return sodium_ctx.transaction([sodium_ctx, this_]() {
+    return sodium_ctx.transaction([sodium_ctx, this_]() mutable {
         Stream<A> s1 = this_.updates();
         Stream<A> spark(sodium_ctx);
-        sodium_ctx.post([this_, spark]() {
-            A& fire = *this_.data->value;
-            sodium_ctx.transaction_void([sodium_ctx, spark, fire]() {
+        sodium_ctx.post([sodium_ctx, this_, spark]() mutable {
+            const A& fire = *this_.data->value;
+            sodium_ctx.transaction_void([sodium_ctx, spark, fire]() mutable {
                 Node node = spark.node();
                 node.data->changed = true;
-                sodium_ctx.data->changed_nodes.push_back(node);
-                spark._send(a);
+                sodium_ctx.data->changed_nodes.push_back(spark.box_clone());
+                spark._send(fire);
             });
         });
         return s1.or_else(spark);
