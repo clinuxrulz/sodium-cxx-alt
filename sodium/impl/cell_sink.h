@@ -1,0 +1,35 @@
+#ifndef __SODIUM_IMPL_CELL_SINK_H__
+#define __SODIUM_IMPL_CELL_SINK_H__
+
+#include "sodium/impl/cell.h"
+#include "sodium/impl/stream_sink.h"
+#include "sodium/impl/sodium_ctx.h"
+
+namespace sodium {
+
+namespace impl {
+
+template <typename A>
+class CellSink {
+public:
+    Cell<A> _cell;
+    StreamSink<A> _stream_sink;
+
+    CellSink(Cell<A> cell, StreamSink<A> stream_sink): _cell(cell), _stream_sink(stream_sink) {}
+
+    CellSink(SodiumCtx& sodium_ctx): this(mkCellSink(sodium_ctx)) {}
+
+    Cell<A> cell() {
+        return this->_cell;
+    }
+
+    void send(A a) {
+        this->_stream_sink.send(a);
+    }
+};
+
+}
+
+}
+
+#endif // __SODIUM_IMPL_CELL_SINK_H__
