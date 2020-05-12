@@ -142,6 +142,26 @@ Stream<A> Cell<A>::updates() const {
     return this->data->stream;
 }
 
+template <typename A>
+Stream<A> Cell<A>::value() const {
+    Stream<A> this_ = *this;
+    SodiumCtx sodium_ctx = this->sodium_ctx();
+    return sodium_ctx.transaction([sodium_ctx, this_]() {
+        Stream<A> s1 = this_.updates();
+        Stream<A> spark(sodium_ctx);
+        sodium_ctx.post([this_, spark]() {
+            A& fire = *this_.data->value;
+            sodium_ctx.transaction_void([sodium_ctx, spark, fire]() {
+                Node node = spark.node();
+                node.data->changed = true;
+                sodium_ctx.data->changed_nodes.push_back(node);
+                spark._send(a);
+            });
+        });
+        return s1.or_else(spark);
+    });
+}
+
 }
 
 }
