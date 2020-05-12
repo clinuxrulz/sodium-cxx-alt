@@ -162,6 +162,14 @@ Stream<A> Cell<A>::value() const {
     });
 }
 
+template <typename A>
+template <typename FN>
+Cell<typename std::result_of<FN(const A&)>::type> Cell<A>::map(FN fn) const {
+    Cell<A> this_= *this;
+    Lazy<A> init = Lazy<A>([this_, fn]() { return fn(this_.sample()); });
+    return this->updates().map(fn).hold_lazy(init);
+}
+
 }
 
 }

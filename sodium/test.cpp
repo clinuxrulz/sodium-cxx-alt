@@ -25,6 +25,7 @@ int main() {
         sodium::impl::Cell<int> ca(sodium_ctx, 1);
         cl.loop(ca);
         sodium::impl::Stream<int> s = ca.value();
+        sodium::impl::Cell<int> cb = ca.map([](const int& x) { return 2 * x; });
     });
     sl.loop(s);
     ss.send(2);

@@ -65,7 +65,7 @@ public:
     Stream<A> value() const;
 
     template <typename FN>
-    Cell<typename std::result_of<FN(const A&)>::type> map(FN f) const;
+    Cell<typename std::result_of<FN(const A&)>::type> map(FN fn) const;
 
     template <typename B, typename FN>
     Cell<typename std::result_of<FN(const A&, const B&)>> lift2(const Cell<B>& cb, FN fn) const;
