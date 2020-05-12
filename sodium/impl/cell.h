@@ -80,7 +80,7 @@ public:
     Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&)>> lift5(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, FN fn) const;
 
     template <typename B, typename C, typename D, typename E, typename F, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>> lift5(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>> lift6(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const;
 
     static Cell<A> switch_s(const Cell<Stream<A>>& csa);
 
