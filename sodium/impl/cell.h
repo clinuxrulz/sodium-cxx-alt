@@ -99,6 +99,8 @@ public:
     std::weak_ptr<CellData<A>> data;
     WeakNode _node;
 
+    WeakCell(std::weak_ptr<CellData<A>> data, WeakNode node): data(data), _node(node) {}
+
     nonstd::optional<Cell<A>> upgrade() const;
 };
 

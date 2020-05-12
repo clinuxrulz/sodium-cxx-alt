@@ -112,6 +112,21 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
     return c;
 }
 
+template <typename A>
+SodiumCtx& Cell<A>::sodium_ctx() const {
+    return this->data->stream.sodium_ctx();
+}
+
+template <typename A>
+Dep Cell<A>::to_dep() const {
+    return Dep(this->_node.gc_node);
+}
+
+template <typename A>
+WeakCell<A> Cell<A>::downgrade() const {
+    return WeakCell<A>(this->data, this->_node.downgrade2());
+}
+
 }
 
 }

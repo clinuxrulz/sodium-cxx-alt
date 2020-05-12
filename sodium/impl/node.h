@@ -176,7 +176,7 @@ public:
 
     virtual std::unique_ptr<IsWeakNode> downgrade();
 
-    WeakNode downgrade2();
+    WeakNode downgrade2() const;
 } Node;
 
 typedef struct NodeData {

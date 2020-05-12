@@ -29,7 +29,7 @@ std::unique_ptr<IsWeakNode> Node::downgrade() {
     return std::unique_ptr<IsWeakNode>((IsWeakNode*)node);
 }
 
-WeakNode Node::downgrade2() {
+WeakNode Node::downgrade2() const {
     return WeakNode(this->data, this->gc_node, this->sodium_ctx);
 }
 
