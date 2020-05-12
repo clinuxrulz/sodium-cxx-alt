@@ -3,6 +3,7 @@
 
 #include "sodium/impl/cell.h"
 #include "sodium/impl/cell_impl.h"
+#include "sodium/impl/cell_loop.h"
 #include "sodium/impl/cell_sink.h"
 #include "sodium/impl/dep.h"
 #include "sodium/impl/lambda.h"

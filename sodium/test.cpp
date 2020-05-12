@@ -20,6 +20,11 @@ int main() {
     sodium::impl::Stream<int> s(sodium_ctx);
     sodium::impl::StreamSink<int> ss(sodium_ctx);
     sodium::impl::CellSink<int> cs(sodium_ctx, 1);
+    sodium_ctx.transaction_void([sodium_ctx]() mutable {
+        sodium::impl::CellLoop<int> cl(sodium_ctx);
+        sodium::impl::Cell<int> ca(sodium_ctx, 1);
+        cl.loop(ca);
+    });
     sl.loop(s);
     ss.send(2);
     auto s2 = s
