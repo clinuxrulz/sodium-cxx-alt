@@ -19,6 +19,7 @@ int main() {
     sodium::impl::StreamLoop<int> sl(sodium_ctx);
     sodium::impl::Stream<int> s(sodium_ctx);
     sodium::impl::StreamSink<int> ss(sodium_ctx);
+    sodium::impl::CellSink<int> cs(sodium_ctx, 1);
     sl.loop(s);
     ss.send(2);
     auto s2 = s

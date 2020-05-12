@@ -152,7 +152,7 @@ Stream<A> Stream<A>::merge(const Stream<A>& s2, FN fn) const {
 
 template <typename A>
 Cell<A> Stream<A>::hold_lazy(Lazy<A> a) const {
-    return this->sodium_ctx().transaction([this]() {
+    return this->sodium_ctx().transaction([this, a]() {
         return Cell<A>(*this, a);
     });
 }

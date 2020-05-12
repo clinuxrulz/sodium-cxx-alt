@@ -15,9 +15,16 @@ public:
     Cell<A> _cell;
     StreamSink<A> _stream_sink;
 
+    CellSink(const CellSink<A>& cs): _cell(cs._cell), _stream_sink(cs._stream_sink) {}
+
     CellSink(Cell<A> cell, StreamSink<A> stream_sink): _cell(cell), _stream_sink(stream_sink) {}
 
-    CellSink(SodiumCtx& sodium_ctx): this(mkCellSink(sodium_ctx)) {}
+    CellSink(SodiumCtx& sodium_ctx, A a): CellSink(mkCellSink(sodium_ctx, a)) {}
+
+    static CellSink<A> mkCellSink(SodiumCtx& sodium_ctx, A a) {
+        StreamSink<A> stream_sink(sodium_ctx);
+        return CellSink<A>(stream_sink.stream().hold(a), stream_sink);
+    }
 
     Cell<A> cell() {
         return this->_cell;
