@@ -127,6 +127,21 @@ WeakCell<A> Cell<A>::downgrade() const {
     return WeakCell<A>(this->data, this->_node.downgrade2());
 }
 
+template <typename A>
+A Cell<A>::sample() const {
+    return *this->data->value;
+}
+
+template <typename A>
+Lazy<A> Cell<A>::sample_lazy() const {
+    return this->data->value;
+}
+
+template <typename A>
+Stream<A> Cell<A>::updates() const {
+    return this->data->stream;
+}
+
 }
 
 }
