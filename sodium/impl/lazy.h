@@ -20,6 +20,8 @@ class Lazy {
 public:
     std::shared_ptr<LazyData<A>> data;
 
+    Lazy(const Lazy<A>& a): data(a.data) {}
+
     template <typename K>
     Lazy(K k) {
         LazyData<A>* data = new LazyData<A>();
@@ -29,6 +31,11 @@ public:
 
     static Lazy<A> of_value(A a) {
         return Lazy([a]() { return a; });
+    }
+
+    Lazy<A>& operator=(const Lazy<A>& a) {
+        this->data = a.data;
+        return *this;
     }
 
     const A& operator*() const {

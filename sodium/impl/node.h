@@ -141,7 +141,7 @@ public:
 
     template <typename UPDATE>
     Node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies)
-    : Node(Node::mk_node(sodium_ctx, name, update, dependencies))
+    : Node(Node::mk_node(sodium_ctx, name, update, std::move(dependencies)))
     {
     }
 

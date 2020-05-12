@@ -26,13 +26,14 @@ public:
 
 template <typename A>
 CellWeakForwardRef<A>::CellWeakForwardRef() {
-    this->data = std::unique_ptr<std::vector<WeakCell<A>>>(new std::Vector<WeakCell<A>>());
+    this->data = std::unique_ptr<std::vector<WeakCell<A>>>(new std::vector<WeakCell<A>>());
 }
 
 template <typename A>
 CellWeakForwardRef<A>& CellWeakForwardRef<A>::operator=(const Cell<A>& rhs) {
-    this->data->clean();
+    this->data->clear();
     this->data->push_back(rhs.downgrade());
+    return *this;
 }
 
 template <typename A>
@@ -64,6 +65,51 @@ Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A value) {
             std::vector<std::unique_ptr<IsNode>>()
         )
     );
+}
+
+template <typename A>
+Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) {
+    Lazy<A> init_value =
+        stream.data->firing_op ?
+            Lazy<A>::of_value(*stream.data->firing_op) :
+            value;
+    std::shared_ptr<CellData<A>> cell_data =
+        std::unique_ptr<CellData<A>>(new CellData<A>(
+            stream,
+            init_value,
+            nonstd::nullopt
+        ));
+    CellWeakForwardRef<A> c_forward_ref;
+    std::vector<std::unique_ptr<IsNode>> dependencies;
+    dependencies.push_back(stream.box_clone());
+    Node node(
+        sodium_ctx,
+        "Cell::hold",
+        [sodium_ctx, stream, c_forward_ref]() mutable {
+            Cell<A> c = c_forward_ref.unwrap();
+            if (stream.data->firing_op) {
+                A& firing = *stream.data->firing_op;
+                bool is_first = !c.data->next_value_op;
+                c.data->next_value_op = nonstd::optional<A>(firing);
+                if (is_first) {
+                    sodium_ctx.post([c]() {
+                        if (c.data->next_value_op) {
+                            c.data->value = Lazy<A>::of_value(*c.data->next_value_op);
+                            c.data->next_value_op = nonstd::nullopt;
+                        }
+                    });
+                }
+            }
+        },
+        std::move(dependencies)
+    );
+    // Hack: Add stream gc node twice, because one is kepted in the cell_data for Cell::update() to return.
+    node.add_update_dependency(stream.to_dep());
+    node.add_update_dependency(stream.to_dep());
+    //
+    Cell c(cell_data, node);
+    c_forward_ref = c;
+    return c;
 }
 
 }
