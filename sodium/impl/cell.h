@@ -38,9 +38,15 @@ public:
     std::shared_ptr<CellData<A>> data;
     Node _node;
 
-    Cell(SodiumCtx& sodium_ctx, A value);
+    Cell(const Cell<A>& ca);
+
+    Cell(std::shared_ptr<CellData<A>> data, Node node): data(data), _node(node) {}
+
+    Cell(SodiumCtx& sodium_ctx, A value): Cell(mkConstCell(sodium_ctx, value)) {}
 
     Cell(Stream<A> stream, Lazy<A> value);
+
+    static Cell<A> mkConstCell(SodiumCtx& sodium_ctx, A value);
 
     SodiumCtx& sodium_ctx() const;
 
