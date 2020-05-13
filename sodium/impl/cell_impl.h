@@ -291,6 +291,25 @@ Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&
         );
 }
 
+// TODO: switchS
+// TODO: switchC
+
+template <typename A>
+template <typename K>
+Listener Cell<A>::listen_weak(K k) const {
+    return this->sodium_ctx().transaction([this]() {
+        return this->value().listen_weak(k);
+    });
+}
+
+template <typename A>
+template <typename K>
+Listener Cell<A>::listen(K k) const {
+    return this->sodium_ctx().transaction([this]() {
+        return this->value().listen(k);
+    });
+}
+
 }
 
 }
