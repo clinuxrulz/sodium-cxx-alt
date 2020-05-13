@@ -13,6 +13,26 @@ void IsNode::add_dependency(const IsNode& dependency) {
     dependency.node().data->dependents.push_back(this->downgrade());
 }
 
+void IsNode::remove_dependency(const IsNode& dependency) {
+    std::vector<std::unique_ptr<IsNode>>& dependencies = this->node().data->dependencies;
+    for (auto dependency2 = dependencies.begin(); dependency2 != dependencies.end(); ++dependency2) {
+        if ((*dependency2)->node().data == dependency.node().data) {
+            dependencies.erase(dependency2);
+            break;
+        }
+    }
+    std::vector<std::unique_ptr<IsWeakNode>>& dependents = dependency.node().data->dependents;
+    for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
+        nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->node().upgrade();
+        if (dependent2_op) {
+            std::unique_ptr<IsNode>& dependent2 = *dependent2_op;
+            if (dependent2->node().data == this->node().data) {
+                dependents.erase(dependent);
+                break;
+            }
+        }
+    }
+}
 
 void Node::add_update_dependency(Dep update_dependency) {
     this->data->update_dependencies.push_back(update_dependency);
