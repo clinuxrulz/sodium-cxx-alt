@@ -44,6 +44,13 @@ public:
         }
         return *this;
     }
+
+    Lambda1<FN>& append_vec_deps(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
 };
 
 

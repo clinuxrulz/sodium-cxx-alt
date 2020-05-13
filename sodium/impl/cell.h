@@ -68,19 +68,19 @@ public:
     Cell<typename std::result_of<FN(const A&)>::type> map(FN fn) const;
 
     template <typename B, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&)>> lift2(const Cell<B>& cb, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&)>::type> lift2(const Cell<B>& cb, FN fn) const;
 
     template <typename B, typename C, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&, const C&)>> lift3(const Cell<B>& cb, const Cell<C>& cc, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&, const C&)>::type> lift3(const Cell<B>& cb, const Cell<C>& cc, FN fn) const;
 
     template <typename B, typename C, typename D, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&)>> lift4(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&)>::type> lift4(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, FN fn) const;
 
     template <typename B, typename C, typename D, typename E, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&)>> lift5(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&)>::type> lift5(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, FN fn) const;
 
     template <typename B, typename C, typename D, typename E, typename F, typename FN>
-    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>> lift6(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const;
+    Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>::type> lift6(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const;
 
     static Cell<A> switch_s(const Cell<Stream<A>>& csa);
 

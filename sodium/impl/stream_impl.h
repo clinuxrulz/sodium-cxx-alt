@@ -49,7 +49,7 @@ template <typename FN>
 Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const {
     typedef typename std::result_of<FN(const A&)>::type R;
     Stream<A> this_ = *this;
-    return Stream::mkStream(
+    return Stream<R>::mkStream(
         this->sodium_ctx(),
         [this_, fn](StreamWeakForwardRef<R> s) {
             std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);

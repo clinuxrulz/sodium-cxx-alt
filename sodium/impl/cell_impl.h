@@ -2,7 +2,9 @@
 #define __SODIUM_IMPL_CELL_IMPL_H__
 
 #include "sodium/optional.h"
+#include "sodium/unit.h"
 #include "sodium/impl/cell.h"
+#include "sodium/impl/lambda.h"
 #include "sodium/impl/lazy.h"
 #include "sodium/impl/sodium_ctx.h"
 #include "sodium/impl/stream.h"
@@ -168,6 +170,40 @@ Cell<typename std::result_of<FN(const A&)>::type> Cell<A>::map(FN fn) const {
     Cell<A> this_= *this;
     Lazy<A> init = Lazy<A>([this_, fn]() { return fn(this_.sample()); });
     return this->updates().map(fn).hold_lazy(init);
+}
+
+template <typename A>
+template <typename B, typename FN>
+Cell<typename std::result_of<FN(const A&, const B&)>::type> Cell<A>::lift2(const Cell<B>& cb, FN fn) const {
+    typedef typename std::result_of<FN(const A&, const B&)>::type C;
+    std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
+    Cell<A> ca = *this;
+    Lazy<A> lhs = ca.sample_lazy();
+    Lazy<B> rhs = cb.sample_lazy();
+    Lazy<C> init([lhs,rhs,fn]() {
+        return fn(*lhs,*rhs);
+    });
+    std::shared_ptr<std::pair<Lazy<A>,Lazy<B>>> state =
+        std::unique_ptr<std::pair<Lazy<A>,Lazy<B>>>(
+            new std::pair<Lazy<A>,Lazy<B>>(
+                lhs,
+                rhs
+            )
+        );
+    Stream<Unit> s1 =
+        this->updates().map([state](const A& a) {
+            state->first = Lazy<A>::of_value(a);
+            return Unit();
+        });
+    Stream<Unit> s2 =
+        cb.updates().map([state](const B& b) {
+            state->second = Lazy<B>::of_value(b);
+            return Unit();
+        });
+    Stream<C> s = s1.or_else(s2).map(lambda1([state, fn](const Unit& _) {
+        return fn(*state->first, *state->second);
+    }).append_vec_deps(fn_deps));
+    return s.hold_lazy(init);
 }
 
 }
