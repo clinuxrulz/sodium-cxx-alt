@@ -16,7 +16,7 @@ unsigned int GcCtx::make_id() {
     return id;
 }
 
-void GcCtx::add_possible_root(GcNode& node) {
+void GcCtx::add_possible_root(const GcNode& node) const {
     this->data->roots.push_back(node);
 }
 
@@ -141,7 +141,7 @@ unsigned int GcNode::ref_count() const {
     return this->data->ref_count;
 }
 
-void GcNode::inc_ref() {
+void GcNode::inc_ref() const {
     if (this->data->freed) {
         // TODO: panic!("gc_node {} inc_ref on freed node ({})", self.id, self.name);
     }
@@ -149,7 +149,7 @@ void GcNode::inc_ref() {
     this->data->color = Color::Black;
 }
 
-void GcNode::dec_ref() {
+void GcNode::dec_ref() const {
     if (this->data->ref_count == 0) {
         return;
     }
@@ -161,14 +161,14 @@ void GcNode::dec_ref() {
     }
 }
 
-void GcNode::release() {
+void GcNode::release() const {
     this->data->color = Color::Black;
     if (!this->data->buffered) {
         this->free();
     }
 }
 
-void GcNode::possible_root() {
+void GcNode::possible_root() const {
     if (this->data->color != Color::Purple) {
         this->data->color = Color::Purple;
         if (!this->data->buffered) {
@@ -178,7 +178,7 @@ void GcNode::possible_root() {
     }
 }
 
-void GcNode::free() {
+void GcNode::free() const {
     this->data->freed = true;
     std::function<Deconstructor> deconstructor = []() {};
     std::swap(deconstructor, this->data->deconstructor);

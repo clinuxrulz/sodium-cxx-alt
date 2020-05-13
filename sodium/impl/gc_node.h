@@ -36,7 +36,7 @@ typedef struct GcCtx {
 
     unsigned int make_id();
 
-    void add_possible_root(GcNode& node);
+    void add_possible_root(const GcNode& node) const;
 
     void collect_cycles();
 
@@ -73,15 +73,15 @@ struct GcNode {
 
     unsigned int ref_count() const;
 
-    void inc_ref();
+    void inc_ref() const;
     
-    void dec_ref();
+    void dec_ref() const;
 
-    void release();
+    void release() const;
 
-    void possible_root();
+    void possible_root() const;
 
-    void free();
+    void free() const;
 
     template <typename TRACER>
     void trace(TRACER tracer);

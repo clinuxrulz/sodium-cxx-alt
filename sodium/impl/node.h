@@ -225,7 +225,7 @@ typedef struct WeakNode: public IsWeakNode {
         }
     }
 
-    virtual nonstd::optional<Node> upgrade2() {
+    virtual nonstd::optional<Node> upgrade2() const {
         std::shared_ptr<NodeData> data = this->data.lock();
         if (data) {
             this->gc_node.inc_ref();

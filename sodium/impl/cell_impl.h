@@ -310,6 +310,18 @@ Listener Cell<A>::listen(K k) const {
     });
 }
 
+template <typename A>
+nonstd::optional<Cell<A>> WeakCell<A>::upgrade() const {
+    std::shared_ptr<CellData<A>> data = this->data.lock();
+    nonstd::optional<Node> node_op = this->_node.upgrade2();
+    if (data && node_op) {
+        Node& node = *node_op;
+        return nonstd::optional<Cell<A>>(Cell<A>(data, node));
+    } else {
+        return nonstd::nullopt;
+    }
+}
+
 }
 
 }
