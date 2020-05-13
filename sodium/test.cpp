@@ -59,6 +59,7 @@ int main() {
                     return a + b + c + d + e + f;
                 }
             );
+        cg.listen([](const int& x) { std::cout << "cg.listener: " << x << std::endl; });
     });
     sl.loop(s);
     ss.send(2);

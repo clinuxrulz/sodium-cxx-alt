@@ -259,7 +259,7 @@ Listener Stream<A>::_listen(K k, bool is_weak) const {
     );
     node.add_update_dependencies(k_deps);
     node.add_update_dependency(this_.to_dep());
-    return Listener::mkListener(sodium_ctx, is_weak, node);
+    return Listener::mkListener(this->sodium_ctx(), is_weak, node);
 }
 
 template <typename A>
