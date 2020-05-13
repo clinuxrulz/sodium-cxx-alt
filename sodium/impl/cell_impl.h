@@ -344,7 +344,75 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
     );
 }
 
-// TODO: switchC
+template <typename A>
+Cell<A> Cell<A>::switch_c(const Cell<Cell<A>>& cca) {
+    SodiumCtx sodium_ctx = csa.sodium_ctx();
+    return Sodium<A>::mkStream(
+        sodium_ctx,
+        [sodium_ctx, csa](StreamWeakForwardRef<A> sa) {
+            std::vector<std::unique<IsNode>> node1_deps;
+            node1_deps.push_back(cca.updates().box_clone());
+            Node node1(
+                sodium_ctx,
+                "switch_c outer node",
+                []() {},
+                node1_deps
+            );
+            Stream<A> init_inner_s = cca.sample().updates();
+            std::shared_ptr<std::tuple<WeakStream<A>>> last_inner_s =
+                std::shared_ptr<std::tuple<WeakStream<A>>>(
+                    new std::tuple<WeakStream<A>>(
+                        init_inner_s.downgrade2()
+                    )
+                );
+            std::vector<std::unique_ptr<IsNode>> node2_deps;
+            node2_deps.push_back(node1.box_clone());
+            node2_deps.push_back(init_inner_s.box_clone());
+            Node node2(
+                sodium_ctx,
+                "switch_c inner node",
+                []() {},
+                node2_deps
+            );
+            std::function<void()> node1_update = [sodium_ctx, csa, last_inner_s, node2]() {
+                nonstd::optional<Cell<A>> firing_op = cca.updates().data->firing_op;
+                if (firing_op) {
+                    Cell<A>& firing = *firing_op;
+                    // will be overwriten by node2 firing if there is one
+                    sodium_ctx.update_node(firing.updates().node());
+                    Stream<A> sa2 = sa.unwrap();
+                    sa2._send(firing.sample());
+                    //
+                    node1.data->changed = true;
+                    node2.data->changed = true;
+                    Stream<S> new_inner_s = firing.updates();
+                    if (new_inner_s.data->firing_op) {
+                        A& firing2 = *new_inner_s.data->firing_op;
+                        sa2._send(firing2);
+                    }
+                    WeakStream<A>& last_inner_s2 = std::get<0>(last_inner_s);
+                    node2.remove_dependency(last_inner_s2.upgrade2());
+                    node2.add_dependency(new_inner_s);
+                    node2.data->changed = true;
+                    last_inner_s2 = new_inner_s.downgrade();
+                }
+            };
+            node1.add_update_dependency(Dep(node1.gc_node));
+            node1.add_update_dependency(Dep(node2.gc_node));
+            node1.data->update = node1_update;
+            std::function<void()> node2_update = [last_inner_s, sa]() {
+                WeakStream<A>& last_inner_s2 = std::get<0>(last_inner_s);
+                Stream<A> last_inner_s3 = *last_inner_s2.upgrade2();
+                if (last_inner_s3.data->firing_op) {
+                    A& firing = *last_inner_s3.data->firing_op;
+                    sa.unwrap()._send(firing);
+                }
+            };
+            node2.data->update = node2_update;
+            return node2;
+        }
+    ).hold_lazy(Lazy([csa]() { return csa.sample().sample(); }));
+}
 
 template <typename A>
 template <typename K>
