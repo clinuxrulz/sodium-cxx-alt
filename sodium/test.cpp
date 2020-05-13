@@ -48,6 +48,17 @@ int main() {
                     return a + b + c + d + e;
                 }
             );
+        sodium::impl::Cell<int> cg =
+            ca.lift6(
+                cb,
+                cc,
+                cd,
+                ce,
+                cf,
+                [](const int& a, const int& b, const int& c, const int& d, const int& e, const int& f) {
+                    return a + b + c + d + e + f;
+                }
+            );
     });
     sl.loop(s);
     ss.send(2);

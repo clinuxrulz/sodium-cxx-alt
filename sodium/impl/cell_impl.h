@@ -269,6 +269,27 @@ Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&
         );
 }
 
+template <typename A>
+template <typename B, typename C, typename D, typename E, typename F, typename FN>
+Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>::type> Cell<A>::lift6(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const {
+    std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
+    return this
+        ->lift4(
+            cb,
+            cc,
+            cd,
+            [](const A& a, const B& b, const C& c, const D& d) {
+                return std::tuple<A,B,C,D>(a, b, c, d);
+            }
+        )
+        .lift3(
+            ce,
+            cf,
+            lambda3([fn](const std::tuple<A,B,C,D>& abcd, const E& e, const F& f) {
+                return fn(std::get<0>(abcd), std::get<1>(abcd), std::get<2>(abcd), std::get<3>(abcd), e, f);
+            }).append_vec_deps(fn_deps)
+        );
+}
 
 }
 
