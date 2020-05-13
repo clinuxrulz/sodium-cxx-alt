@@ -29,6 +29,15 @@ int main() {
         sodium::impl::Cell<int> cc = ca.lift2(cb, [](const int& x, const int& y) { return x + y; });
         sodium::impl::Cell<int> cd =
             ca.lift3(cb, cc, [](const int& a, const int& b, const int& c) { return a*b*c; });
+        sodium::impl::Cell<int> ce =
+            ca.lift4(
+                cb,
+                cc,
+                cd,
+                [](const int& a, const int& b, const int& c, const int& d) {
+                    return a - b - c - d;
+                }
+            );
     });
     sl.loop(s);
     ss.send(2);

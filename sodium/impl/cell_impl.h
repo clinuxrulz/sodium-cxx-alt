@@ -1,6 +1,9 @@
 #ifndef __SODIUM_IMPL_CELL_IMPL_H__
 #define __SODIUM_IMPL_CELL_IMPL_H__
 
+#include <tuple>
+#include <utility>
+
 #include "sodium/optional.h"
 #include "sodium/unit.h"
 #include "sodium/impl/cell.h"
@@ -221,6 +224,26 @@ Cell<typename std::result_of<FN(const A&, const B&, const C&)>::type> Cell<A>::l
             cc,
             lambda2([fn](const std::pair<A,B>& ab, const C& c) {
                 return fn(ab.first, ab.second, c);
+            }).append_vec_deps(fn_deps)
+        );
+}
+
+template <typename A>
+template <typename B, typename C, typename D, typename FN>
+Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&)>::type> Cell<A>::lift4(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, FN fn) const {
+    std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
+    return this
+        ->lift3(
+            cb,
+            cc,
+            [](const A& a, const B& b, const C& c) {
+                return std::tuple<A,B,C>(a, b, c);
+            }
+        )
+        .lift2(
+            cd,
+            lambda2([fn](const std::tuple<A,B,C>& abc, const D& d) {
+                return fn(std::get<0>(abc), std::get<1>(abc), std::get<2>(abc), d);
             }).append_vec_deps(fn_deps)
         );
 }
