@@ -67,6 +67,8 @@ int main() {
         .map(sodium::impl::lambda1([](const int& x) { return x + 1; }) << s.to_dep())
         .filter([](const int& x) { return x > 0; })
         .or_else(s);
+    sodium::impl::Cell<sodium::impl::Stream<int>> csi(sodium_ctx, s2);
+    sodium::impl::Stream<int> si = sodium::impl::Cell<int>::switch_s(csi);
     sodium_ctx.transaction_void([]() {});
     sodium::impl::GcCtx gc_ctx;
     sodium::impl::GcNode node(gc_ctx, "test_node", []() {}, [](std::function<sodium::impl::Tracer> tracer) {});

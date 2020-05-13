@@ -82,7 +82,7 @@ public:
     template <typename B, typename C, typename D, typename E, typename F, typename FN>
     Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&, const F&)>::type> lift6(const Cell<B>& cb, const Cell<C>& cc, const Cell<D>& cd, const Cell<E>& ce, const Cell<F>& cf, FN fn) const;
 
-    static Cell<A> switch_s(const Cell<Stream<A>>& csa);
+    static Stream<A> switch_s(const Cell<Stream<A>>& csa);
 
     static Cell<A> switch_c(const Cell<Cell<A>>& cca);
 

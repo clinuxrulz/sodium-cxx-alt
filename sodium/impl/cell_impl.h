@@ -291,7 +291,59 @@ Cell<typename std::result_of<FN(const A&, const B&, const C&, const D&, const E&
         );
 }
 
-// TODO: switchS
+template <typename A>
+Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
+    SodiumCtx sodium_ctx = csa.sodium_ctx();
+    return Stream<A>::mkStream(
+        sodium_ctx,
+        [sodium_ctx, csa](StreamWeakForwardRef<A> sa) {
+            std::shared_ptr<std::tuple<WeakStream<A>>> inner_s =
+                std::shared_ptr<std::tuple<WeakStream<A>>>(
+                    new std::tuple<WeakStream<A>>(
+                        csa.sample().downgrade2()
+                    )
+                );
+            std::vector<std::unique_ptr<IsNode>> node1_deps;
+            node1_deps.push_back(csa.sample().box_clone());
+            Node node1(
+                sodium_ctx,
+                "switch_s inner node",
+                [inner_s, sa]() {
+                    Stream<A> inner_s2 = *std::get<0>(*inner_s).upgrade2();
+                    if (inner_s2.data->firing_op) {
+                        A& firing = *inner_s2.data->firing_op;
+                        sa.unwrap()._send(firing);
+                    }
+                },
+                std::move(node1_deps)
+            );
+            Stream<Stream<A>> csa_updates = csa.updates();
+            std::vector<std::unique_ptr<IsNode>> node2_deps;
+            node2_deps.push_back(csa_updates.box_clone());
+            Node node2(
+                sodium_ctx,
+                "switch_s outer node",
+                [sodium_ctx, inner_s, node1, csa_updates]() mutable {
+                    if (csa_updates.data->firing_op) {
+                        Stream<A>& firing = *csa_updates.data->firing_op;
+                        sodium_ctx.pre_post([node1, inner_s, firing]() mutable {
+                            Stream<A>& inner_s2 = *std::get<0>(*inner_s).upgrade2();
+                            node1.remove_dependency(inner_s2);
+                            node1.add_dependency(firing);
+                            *inner_s = std::tuple<WeakStream<A>>(firing.downgrade2());
+                        });
+                    }
+                },
+                std::move(node2_deps)
+            );
+            node1.add_update_dependency(csa_updates.to_dep());
+            node1.add_update_dependency(Dep(node1.gc_node));
+            node1.add_dependency(node2);
+            return node1;
+        }
+    );
+}
+
 // TODO: switchC
 
 template <typename A>

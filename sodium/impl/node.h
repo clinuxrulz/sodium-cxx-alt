@@ -38,6 +38,8 @@ public:
     GcNode gc_node();
 
     void add_dependency(const IsNode& dependency);
+
+    void remove_dependency(const IsNode& dependency);
 };
 
 class IsWeakNode {
