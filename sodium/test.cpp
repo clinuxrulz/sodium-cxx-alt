@@ -27,6 +27,8 @@ int main() {
         sodium::impl::Stream<int> s = ca.value();
         sodium::impl::Cell<int> cb = ca.map([](const int& x) { return 2 * x; });
         sodium::impl::Cell<int> cc = ca.lift2(cb, [](const int& x, const int& y) { return x + y; });
+        sodium::impl::Cell<int> cd =
+            ca.lift3(cb, cc, [](const int& a, const int& b, const int& c) { return a*b*c; });
     });
     sl.loop(s);
     ss.send(2);

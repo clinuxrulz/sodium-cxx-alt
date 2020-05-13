@@ -206,6 +206,25 @@ Cell<typename std::result_of<FN(const A&, const B&)>::type> Cell<A>::lift2(const
     return s.hold_lazy(init);
 }
 
+template <typename A>
+template <typename B, typename C, typename FN>
+Cell<typename std::result_of<FN(const A&, const B&, const C&)>::type> Cell<A>::lift3(const Cell<B>& cb, const Cell<C>& cc, FN fn) const {
+    std::vector<Dep> fn_deps = GetDeps<FN>::call(fn);
+    return this
+        ->lift2(
+            cb,
+            [](const A& a, const B& b) {
+                return std::pair<A,B>(a,b);
+            }
+        )
+        .lift2(
+            cc,
+            lambda2([fn](const std::pair<A,B>& ab, const C& c) {
+                return fn(ab.first, ab.second, c);
+            }).append_vec_deps(fn_deps)
+        );
+}
+
 }
 
 }

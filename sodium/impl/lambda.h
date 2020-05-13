@@ -56,6 +56,7 @@ public:
 
 template <typename FN>
 class Lambda2: public Lambda<FN> {
+public:
     Lambda2(FN fn): Lambda(fn) {}
 
     template <typename A, typename B>
@@ -80,10 +81,18 @@ class Lambda2: public Lambda<FN> {
         }
         return *this;
     }
+
+    Lambda2<FN>& append_vec_deps(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
 };
 
 template <typename FN>
 class Lambda3: public Lambda<FN> {
+public:
     Lambda3(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C>
@@ -108,10 +117,18 @@ class Lambda3: public Lambda<FN> {
         }
         return *this;
     }
+
+    Lambda3<FN>& append_vec_deps(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
 };
 
 template <typename FN>
 class Lambda4: public Lambda<FN> {
+public:
     Lambda4(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C, typename D>
@@ -136,10 +153,18 @@ class Lambda4: public Lambda<FN> {
         }
         return *this;
     }
+
+    Lambda4<FN>& append_vec_deps(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
 };
 
 template <typename FN>
 class Lambda5: public Lambda<FN> {
+public:
     Lambda5(FN fn): Lambda(fn) {}
 
     template <typename A, typename B, typename C, typename D, typename E>
@@ -159,6 +184,13 @@ class Lambda5: public Lambda<FN> {
     }
 
     Lambda5<FN>& operator<<(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
+
+    Lambda5<FN>& append_vec_deps(const std::vector<Dep>& deps) {
         for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
             this->deps.push_back(*dep);
         }
@@ -189,6 +221,13 @@ public:
     }
 
     Lambda6<FN>& operator<<(const std::vector<Dep>& deps) {
+        for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
+            this->deps.push_back(*dep);
+        }
+        return *this;
+    }
+
+    Lambda6<FN>& append_vec_deps(const std::vector<Dep>& deps) {
         for (auto dep = deps.cbegin(); dep != deps.cend(); ++dep) {
             this->deps.push_back(*dep);
         }
