@@ -8,6 +8,8 @@ set( SODIUM_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sodium )
 
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
+find_package( Boost REQUIRED )
+
 file( GLOB 
     SODIUM_INCLUDE_FILES 
     ${SODIUM_BASE_DIR}/*.h
@@ -32,6 +34,8 @@ file(
     COPY ${SODIUM_IMPL_INCLUDE_FILES} 
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/sodium/impl
     )
+
+include_directories( ${Boost_INCLUDE_DIR} )
 
 set( ALL_SOURCES ${SODIUM_INCLUDE_FILES} ${SODIUM_SOURCE_FILES} )
 
