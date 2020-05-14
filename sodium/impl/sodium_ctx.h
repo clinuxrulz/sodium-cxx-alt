@@ -91,6 +91,30 @@ typedef struct SodiumCtx {
 
 } SodiumCtx;
 
+typedef struct Transaction {
+    SodiumCtx sodium_ctx;
+    bool is_closed = false;
+
+    Transaction(const SodiumCtx& sodium_ctx): sodium_ctx(sodium_ctx) {
+        sodium_ctx.data->transaction_depth = sodium_ctx.data->transaction_depth + 1;
+    }
+
+    ~Transaction() {
+        close();
+    }
+
+    void close() {
+        if (is_closed) {
+            return;
+        }
+        this->sodium_ctx.data->transaction_depth = this->sodium_ctx.data->transaction_depth - 1;
+        if (this->sodium_ctx.data->transaction_depth == 0) {
+            this->sodium_ctx.end_of_transaction();
+        }
+        is_closed = true;
+    }
+} Transaction;
+
 }
 
 }
