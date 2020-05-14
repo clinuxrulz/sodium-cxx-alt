@@ -15,6 +15,10 @@
 
 namespace sodium {
 
+    namespace impl {
+        extern SodiumCtx sodium_ctx;
+    }
+
     // TODO: Create user API via wrappers of all the impl folder stuff.
     //
     // TODO: Create global SodiumCtx to be used via the wrappers, so
