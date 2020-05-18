@@ -17,8 +17,7 @@ namespace impl {
 struct NodeData;
 typedef struct NodeData NodeData;
 
-struct Node;
-typedef struct Node Node;
+class Node;
 
 struct WeakNode;
 typedef struct WeakNode WeakNode;
@@ -53,7 +52,7 @@ public:
     virtual boost::optional<std::unique_ptr<IsNode>> upgrade() = 0;
 };
 
-typedef struct Node: public IsNode {
+class Node: public IsNode {
 public:
     std::shared_ptr<NodeData> data;
     GcNode gc_node;
@@ -179,7 +178,7 @@ public:
     virtual std::unique_ptr<IsWeakNode> downgrade();
 
     WeakNode downgrade2() const;
-} Node;
+};
 
 typedef struct NodeData {
     bool visited;

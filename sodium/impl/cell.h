@@ -20,9 +20,9 @@ class CellData;
 template <typename A>
 class WeakCell;
 
-class SodiumCtx;
+typedef struct SodiumCtx SodiumCtx;
 
-class Dep;
+typedef struct Dep Dep;
 
 template <typename A>
 class Stream;

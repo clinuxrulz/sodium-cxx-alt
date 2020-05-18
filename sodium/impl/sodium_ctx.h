@@ -12,8 +12,7 @@ namespace sodium {
 
 namespace impl {
 
-struct Node;
-typedef struct Node Node;
+class Node;
 
 struct SodiumCtxData;
 typedef struct SodiumCtxData SodiumCtxData;

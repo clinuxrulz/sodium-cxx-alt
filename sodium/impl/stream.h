@@ -27,7 +27,7 @@ class StreamWeakForwardRef;
 template <typename A>
 class Cell;
 
-class Listener;
+typedef struct Listener Listener;
 
 template <typename A>
 class Stream: public IsNode {
