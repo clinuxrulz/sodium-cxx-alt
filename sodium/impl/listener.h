@@ -2,7 +2,7 @@
 #define __SODIUM_CXX_IMPL_LISTENER_H__
 
 #include <memory>
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/impl/gc_node.h"
 
 namespace sodium {

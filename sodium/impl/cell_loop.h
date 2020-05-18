@@ -1,7 +1,7 @@
 #ifndef __SODIUM_IMPL_CELL_LOOP_H__
 #define __SODIUM_IMPL_CELL_LOOP_H__
 
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/impl/cell.h"
 #include "sodium/impl/lazy.h"
 #include "sodium/impl/stream_loop.h"

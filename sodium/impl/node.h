@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/impl/dep.h"
 #include "sodium/impl/gc_node.h"
 #include "sodium/impl/sodium_ctx.h"
@@ -50,7 +50,7 @@ public:
 
     virtual std::unique_ptr<IsWeakNode> box_clone() = 0;
 
-    virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() = 0;
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() = 0;
 };
 
 typedef struct Node: public IsNode {
@@ -85,7 +85,7 @@ public:
                 }
             }
             for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-                nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
+                boost::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
                 if (dependent2_op) {
                     std::unique_ptr<IsNode> dependent2 = std::move(*dependent2_op);
                     std::vector<std::unique_ptr<IsNode>>& dependencies = dependent2->node().data->dependencies;
@@ -218,22 +218,22 @@ typedef struct WeakNode: public IsWeakNode {
         return std::unique_ptr<IsWeakNode>(node);
     }
 
-    virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() {
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() {
         auto node_op = this->upgrade2();
         if (node_op) {
-            return nonstd::optional<std::unique_ptr<IsNode>>(std::unique_ptr<IsNode>((IsNode*)new Node(*node_op)));
+            return boost::optional<std::unique_ptr<IsNode>>(std::unique_ptr<IsNode>((IsNode*)new Node(*node_op)));
         } else {
-            return nonstd::nullopt;
+            return boost::none;
         }
     }
 
-    virtual nonstd::optional<Node> upgrade2() const {
+    virtual boost::optional<Node> upgrade2() const {
         std::shared_ptr<NodeData> data = this->data.lock();
         if (data) {
             this->gc_node.inc_ref();
-            return nonstd::optional<Node>(Node(data, this->gc_node, this->sodium_ctx));
+            return boost::optional<Node>(Node(data, this->gc_node, this->sodium_ctx));
         } else {
-            return nonstd::nullopt;
+            return boost::none;
         }
     }
 } WeakNode;

@@ -1,7 +1,7 @@
 #ifndef __SODIUM_IMPL_CELL_H__
 #define __SODIUM_IMPL_CELL_H__
 
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/impl/lazy.h"
 #include "sodium/impl/node.h"
 
@@ -101,7 +101,7 @@ public:
 
     WeakCell(std::weak_ptr<CellData<A>> data, WeakNode node): data(data), _node(node) {}
 
-    nonstd::optional<Cell<A>> upgrade() const;
+    boost::optional<Cell<A>> upgrade() const;
 };
 
 template <typename A>

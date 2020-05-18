@@ -23,7 +23,7 @@ void IsNode::remove_dependency(const IsNode& dependency) {
     }
     std::vector<std::unique_ptr<IsWeakNode>>& dependents = dependency.node().data->dependents;
     for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-        nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->node().upgrade();
+        boost::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->node().upgrade();
         if (dependent2_op) {
             std::unique_ptr<IsNode>& dependent2 = *dependent2_op;
             if (dependent2->node().data == this->node().data) {

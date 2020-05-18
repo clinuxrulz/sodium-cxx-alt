@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <memory>
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 
 namespace sodium {
 
@@ -11,8 +11,8 @@ namespace impl {
 
 template <typename A>
 struct LazyData {
-    nonstd::optional<std::function<A()>> thunk_op;
-    nonstd::optional<A> value_op;
+    boost::optional<std::function<A()>> thunk_op;
+    boost::optional<A> value_op;
 };
 
 template <typename A>
@@ -25,7 +25,7 @@ public:
     template <typename K>
     Lazy(K k) {
         LazyData<A>* data = new LazyData<A>();
-        data->thunk_op = nonstd::optional<std::function<A()>>(std::function<A()>(k));
+        data->thunk_op = boost::optional<std::function<A()>>(std::function<A()>(k));
         this->data = std::unique_ptr<LazyData<A>>(data);
     }
 
@@ -50,8 +50,8 @@ private:
     const A& get() const {
         if (this->data->thunk_op) {
             std::function<A()>& thunk = *this->data->thunk_op;
-            this->data->value_op = nonstd::optional<A>(thunk());
-            this->data->thunk_op = nonstd::nullopt;
+            this->data->value_op = boost::optional<A>(thunk());
+            this->data->thunk_op = boost::none;
         }
         A& a = *this->data->value_op;
         return a;

@@ -50,7 +50,7 @@ void SodiumCtx::dec_node_ref_count() {
 void SodiumCtx::add_dependents_to_changed_nodes(IsNode& node) {
     std::vector<std::unique_ptr<IsWeakNode>>& dependents = node.node().data->dependents;
     for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-        nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
+        boost::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
         if (dependent2_op) {
             std::unique_ptr<IsNode> dependent2 = std::move(*dependent2_op);
             this->data->changed_nodes.push_back(std::move(dependent2));
@@ -115,7 +115,7 @@ void SodiumCtx::update_node(Node& node) {
     if (node.data->changed) {
         std::vector<std::unique_ptr<IsWeakNode>> dependents = box_clone_vec_is_weak_node(node.data->dependents);
         for (auto dependent = dependents.begin(); dependent != dependents.end(); ++dependent) {
-            nonstd::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
+            boost::optional<std::unique_ptr<IsNode>> dependent2_op = (*dependent)->upgrade();
             if (dependent2_op) {
                 std::unique_ptr<IsNode> dependent2 = std::move(*dependent2_op);
                 this->update_node(dependent2->node());

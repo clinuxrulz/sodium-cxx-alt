@@ -4,7 +4,7 @@
 #include <tuple>
 #include <utility>
 
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/unit.h"
 #include "sodium/impl/cell.h"
 #include "sodium/impl/lambda.h"
@@ -22,9 +22,9 @@ class CellData {
 public:
     Stream<A> stream;
     Lazy<A> value;
-    nonstd::optional<A> next_value_op;
+    boost::optional<A> next_value_op;
 
-    CellData(Stream<A> stream, Lazy<A> value, nonstd::optional<A> next_value_op)
+    CellData(Stream<A> stream, Lazy<A> value, boost::optional<A> next_value_op)
     : stream(stream), value(value), next_value_op(next_value_op)
     {}
 };
@@ -57,7 +57,7 @@ Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A value) {
         CellData<A>* _cell_data = new CellData<A>(
             Stream<A>(sodium_ctx),
             Lazy<A>::of_value(value),
-            nonstd::nullopt
+            boost::none
         );
         cell_data = std::unique_ptr<CellData<A>>(_cell_data);
     }
@@ -82,7 +82,7 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
         std::unique_ptr<CellData<A>>(new CellData<A>(
             stream,
             init_value,
-            nonstd::nullopt
+            boost::none
         ));
     CellWeakForwardRef<A> c_forward_ref;
     std::vector<std::unique_ptr<IsNode>> dependencies;
@@ -95,12 +95,12 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
             if (stream.data->firing_op) {
                 A& firing = *stream.data->firing_op;
                 bool is_first = !c.data->next_value_op;
-                c.data->next_value_op = nonstd::optional<A>(firing);
+                c.data->next_value_op = boost::optional<A>(firing);
                 if (is_first) {
                     sodium_ctx.post([c]() {
                         if (c.data->next_value_op) {
                             c.data->value = Lazy<A>::of_value(*c.data->next_value_op);
-                            c.data->next_value_op = nonstd::nullopt;
+                            c.data->next_value_op = boost::none;
                         }
                     });
                 }
@@ -375,7 +375,7 @@ Cell<A> Cell<A>::switch_c(const Cell<Cell<A>>& cca) {
                 std::move(node2_deps)
             );
             std::function<void()> node1_update = [sodium_ctx, cca, last_inner_s, node1, node2, sa]() mutable {
-                nonstd::optional<Cell<A>> firing_op = cca.updates().data->firing_op;
+                boost::optional<Cell<A>> firing_op = cca.updates().data->firing_op;
                 if (firing_op) {
                     Cell<A>& firing = *firing_op;
                     // will be overwriten by node2 firing if there is one
@@ -431,14 +431,14 @@ Listener Cell<A>::listen(K k) const {
 }
 
 template <typename A>
-nonstd::optional<Cell<A>> WeakCell<A>::upgrade() const {
+boost::optional<Cell<A>> WeakCell<A>::upgrade() const {
     std::shared_ptr<CellData<A>> data = this->data.lock();
-    nonstd::optional<Node> node_op = this->_node.upgrade2();
+    boost::optional<Node> node_op = this->_node.upgrade2();
     if (data && node_op) {
         Node& node = *node_op;
-        return nonstd::optional<Cell<A>>(Cell<A>(data, node));
+        return boost::optional<Cell<A>>(Cell<A>(data, node));
     } else {
-        return nonstd::nullopt;
+        return boost::none;
     }
 }
 

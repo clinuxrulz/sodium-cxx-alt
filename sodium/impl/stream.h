@@ -13,9 +13,9 @@ namespace impl {
 template <typename A>
 class StreamData {
 public:
-    nonstd::optional<A> firing_op;
+    boost::optional<A> firing_op;
     SodiumCtx sodium_ctx;
-    nonstd::optional<std::function<A(const A&,const A&)>> coalescer_op;
+    boost::optional<std::function<A(const A&,const A&)>> coalescer_op;
 };
 
 template <typename A>
@@ -55,7 +55,7 @@ public:
     Stream(SodiumCtx& sodium_ctx, COALESCER coalescer)
     : Stream(sodium_ctx)
     {
-        this->data->coalescer_op = nonstd::optional<std::function<A(A&,A&)>>(coalescer);
+        this->data->coalescer_op = boost::optional<std::function<A(A&,A&)>>(coalescer);
     }
 
     template <typename MK_NODE>
@@ -132,17 +132,17 @@ public:
                 std::function<A(const A&, const A&)>& coalescer = *this->data->coalescer_op;
                 if (this->data->firing_op) {
                     A& firing = *this->data->firing_op;
-                    this->data->firing_op = nonstd::optional<A>(coalescer(firing, a));
+                    this->data->firing_op = boost::optional<A>(coalescer(firing, a));
                 } else {
-                    this->data->firing_op = nonstd::optional<A>(a);
+                    this->data->firing_op = boost::optional<A>(a);
                 }
             } else {
-                this->data->firing_op = nonstd::optional<A>(a);
+                this->data->firing_op = boost::optional<A>(a);
             }
             this->node().data->changed = true;
             if (is_first) {
                 sodium_ctx.pre_post([this]() {
-                    this->data->firing_op = nonstd::nullopt;
+                    this->data->firing_op = boost::none;
                     this->node().data->changed = false;
                 });
             }
@@ -166,12 +166,12 @@ public:
         return std::unique_ptr<IsWeakNode>(new WeakStream<A>(*this));
     }
 
-    virtual nonstd::optional<std::unique_ptr<IsNode>> upgrade() {
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() {
         std::shared_ptr<StreamData<A>> data = this->data.lock();
-        nonstd::optional<Node> node_op = this->_node.upgrade2();
+        boost::optional<Node> node_op = this->_node.upgrade2();
         if (data && node_op) {
             Node node = std::move(*node_op);
-            return nonstd::optional<std::unique_ptr<IsNode>>(
+            return boost::optional<std::unique_ptr<IsNode>>(
                 std::unique_ptr<IsNode>(
                     (IsNode*)new Stream<A>(
                         data,
@@ -180,18 +180,18 @@ public:
                 )
             );
         } else {
-            return nonstd::nullopt;
+            return boost::none;
         }
     }
 
-    nonstd::optional<Stream<A>> upgrade2() {
+    boost::optional<Stream<A>> upgrade2() {
         std::shared_ptr<StreamData<A>> data = this->data.lock();
-        nonstd::optional<Node> node_op = this->_node.upgrade2();
+        boost::optional<Node> node_op = this->_node.upgrade2();
         if (data && node_op) {
             Node node = *node_op;
-            return nonstd::optional<Stream<A>>(Stream<A>(data, node));
+            return boost::optional<Stream<A>>(Stream<A>(data, node));
         } else {
-            return nonstd::nullopt;
+            return boost::none;
         }
     }
 };
@@ -215,7 +215,7 @@ public:
 
     Stream<A> unwrap() const {
         WeakStream<A>& s = (*(this->data))[0];
-        nonstd::optional<Stream<A>> s2 = s.upgrade2();
+        boost::optional<Stream<A>> s2 = s.upgrade2();
         return *s2;
     }
 };

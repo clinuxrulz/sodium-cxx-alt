@@ -10,7 +10,7 @@ namespace impl {
 struct ListenerData {
     SodiumCtx sodium_ctx;
     bool is_weak;
-    nonstd::optional<Node> node_op;
+    boost::optional<Node> node_op;
 };
 
 Listener Listener::mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node) {
@@ -19,11 +19,11 @@ Listener Listener::mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node) {
         ListenerData* _listener_data = new ListenerData();
         _listener_data->sodium_ctx = sodium_ctx;
         _listener_data->is_weak = is_weak;
-        _listener_data->node_op = nonstd::optional<Node>(node);
+        _listener_data->node_op = boost::optional<Node>(node);
         listener_data = std::unique_ptr<ListenerData>(_listener_data);
     }
     auto gc_node_deconstructor = [listener_data]() mutable {
-        listener_data->node_op = nonstd::nullopt;
+        listener_data->node_op = boost::none;
     };
     auto gc_node_trace = [listener_data](std::function<Tracer>& tracer) {
         if (listener_data->node_op) {
@@ -47,7 +47,7 @@ Listener Listener::mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node) {
 }
 
 void Listener::unlisten() {
-    this->data->node_op = nonstd::nullopt;
+    this->data->node_op = boost::none;
     if (!this->data->is_weak) {
         SodiumCtx& sodium_ctx = this->data->sodium_ctx;
         sodium_ctx.remove_listener_from_keep_alive(*this);

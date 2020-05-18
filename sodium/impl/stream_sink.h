@@ -1,7 +1,7 @@
 #ifndef __SODIUM_IMPL_STREAM_SINK_H__
 #define __SODIUM_IMPL_STREAM_SINK_H__
 
-#include "sodium/optional.h"
+#include <boost/optional.hpp>
 #include "sodium/impl/stream.h"
 
 namespace sodium {
@@ -49,13 +49,13 @@ public:
     WeakStreamSink(WeakStream<A> stream, SodiumCtx sodium_ctx)
     : _stream(stream), sodium_ctx(sodium_ctx) {}
 
-    nonstd::optional<StreamSink<A>> upgrade() {
-        nonstd::optional<Stream<A>> stream_op = this->_stream.upgrade2();
+    boost::optional<StreamSink<A>> upgrade() {
+        boost::optional<Stream<A>> stream_op = this->_stream.upgrade2();
         if (stream_op) {
             Stream<A>& stream = *stream_op;
-            return nonstd::optional<StreamSink<A>>(StreamSink<A>(stream));
+            return boost::optional<StreamSink<A>>(StreamSink<A>(stream));
         } else {
-            return nonstd::nullopt;
+            return boost::none;
         }
     }
 };

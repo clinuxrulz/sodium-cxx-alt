@@ -18,9 +18,9 @@ Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
     std::shared_ptr<StreamData<A>> stream_data;
     {
         StreamData<A>* _stream_data = new StreamData<A>();
-        _stream_data->firing_op = nonstd::nullopt;
+        _stream_data->firing_op = boost::none;
         _stream_data->sodium_ctx = sodium_ctx;
-        _stream_data->coalescer_op = nonstd::nullopt;
+        _stream_data->coalescer_op = boost::none;
         stream_data = std::unique_ptr<StreamData<A>>(_stream_data);
     }
     Stream<A> s(stream_data, node);
@@ -30,7 +30,7 @@ Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
         node.data->changed = true;
     }
     sodium_ctx.pre_post([s]() {
-        s.data->firing_op = nonstd::nullopt;
+        s.data->firing_op = boost::none;
         s._node.data->changed = false;
     });
     return s;
@@ -59,7 +59,7 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
                 this_.sodium_ctx(),
                 "Stream::map",
                 [this_, s, fn]() {
-                    nonstd::optional<A>& firing_op = this_.data->firing_op;
+                    boost::optional<A>& firing_op = this_.data->firing_op;
                     if (firing_op) {
                         s.unwrap()._send(fn(*firing_op));
                     }
@@ -123,8 +123,8 @@ Stream<A> Stream<A>::merge(const Stream<A>& s2, FN fn) const {
                 this_.sodium_ctx(),
                 "Stream::merge",
                 [this_, s2, s, fn]() {
-                    nonstd::optional<A>& firing1_op = this_.data->firing_op;
-                    nonstd::optional<A>& firing2_op = s2.data->firing_op;
+                    boost::optional<A>& firing1_op = this_.data->firing_op;
+                    boost::optional<A>& firing2_op = s2.data->firing_op;
                     if (firing1_op) {
                         A& firing1 = *firing1_op;
                         if (firing2_op) {
@@ -197,7 +197,7 @@ Stream<A> Stream<A>::defer() const {
         Stream<A> s = ss.stream();
         WeakStreamSink<A> weak_ss = ss.downgrade();
         Listener listener = this_.listen_weak([sodium_ctx, weak_ss](const A& a) {
-            nonstd::optional<StreamSink<A>> ss_op = weak_ss.upgrade();
+            boost::optional<StreamSink<A>> ss_op = weak_ss.upgrade();
             StreamSink<A> ss = *ss_op;
             sodium_ctx.post([ss, a] { ss.send(a); });
         });
