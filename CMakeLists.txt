@@ -10,6 +10,10 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 find_package( Boost REQUIRED )
 
+if ( MSVC )
+    add_compile_options(-bigobj)
+endif ( MSVC )
+
 file( GLOB 
     SODIUM_INCLUDE_FILES 
     ${SODIUM_BASE_DIR}/*.h
