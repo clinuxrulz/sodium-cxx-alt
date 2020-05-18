@@ -193,17 +193,17 @@ Cell<typename std::result_of<FN(const A&, const B&)>::type> Cell<A>::lift2(const
                 rhs
             )
         );
-    Stream<Unit> s1 =
+    Stream<unit> s1 =
         this->updates().map([state](const A& a) {
             state->first = Lazy<A>::of_value(a);
-            return Unit();
+            return unit();
         });
-    Stream<Unit> s2 =
+    Stream<unit> s2 =
         cb.updates().map([state](const B& b) {
             state->second = Lazy<B>::of_value(b);
-            return Unit();
+            return unit();
         });
-    Stream<C> s = s1.or_else(s2).map(lambda1([state, fn](const Unit& _) {
+    Stream<C> s = s1.or_else(s2).map(lambda1([state, fn](const unit& _) {
         return fn(*state->first, *state->second);
     }).append_vec_deps(fn_deps));
     return s.hold_lazy(init);
