@@ -22,6 +22,10 @@ namespace sodium {
              */
             inline void close() { impl_.close(); }
 
+            bool is_in_callback() const {
+                return impl_.is_in_callback();
+            }
+
             /* TODO: ???
             void prioritized(impl::prioritized_entry* e)
             {

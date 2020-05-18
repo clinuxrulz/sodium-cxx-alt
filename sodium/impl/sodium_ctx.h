@@ -112,6 +112,11 @@ typedef struct Transaction {
         }
         is_closed = true;
     }
+
+    bool is_in_callback() const {
+        // TODO: implement this
+    }
+
 } Transaction;
 
 }

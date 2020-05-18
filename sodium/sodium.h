@@ -1,6 +1,7 @@
 #ifndef __SODIUM_SODIUM_H__
 #define __SODIUM_SODIUM_H__
 
+#include "sodium/config.h"
 #include "sodium/transaction.h"
 #include "sodium/impl/cell.h"
 #include "sodium/impl/cell_impl.h"
@@ -131,10 +132,7 @@ namespace sodium {
          * Sample the value of this cell.
          */
         A sample() const {
-            transaction trans;
-            A a = *impl->sample().template cast_ptr<A>(NULL);
-            trans.close();
-            return a;
+            return this->impl_.sample();
         }
 
         lazy<A> sample_lazy() const {
@@ -387,19 +385,14 @@ namespace sodium {
          * created by a hold, then this gives you back an stream equivalent to
          * the one that was held.
          */
-        stream<A> updates() const { return stream<A>(impl->updates); }
+        stream<A> updates() const { return stream<A>(this->impl_.updates()); }
 
         /*!
          * Returns an stream describing the value of a cell, where there's an
          * initial stream giving the current value.
          */
         stream<A> value() const {
-            transaction trans;
-            stream<A> sa =
-                stream<A>(value_(trans.impl()))
-                    .coalesce([](const A&, const A& b) { return b; });
-            trans.close();
-            return sa;
+            return stream<A>(this->impl_.value());
         }
 
         /*!
@@ -656,13 +649,7 @@ namespace sodium {
          * values where the predicate returns true.
          */
         stream<A> filter(const std::function<bool(const A&)>& pred) const {
-            transaction trans;
-            stream<A> sa =
-                stream<A>(filter_(trans.impl(), [pred](const light_ptr& a) {
-                    return pred(*a.cast_ptr<A>(NULL));
-                }));
-            trans.close();
-            return sa;
+            return stream<A>(this->impl_.filter(pred));
         }
 
         /*!
@@ -898,10 +885,7 @@ namespace sodium {
         }
 
         stream<A> once() const {
-            transaction trans;
-            stream<A> sa(once_(trans.impl()));
-            trans.close();
-            return sa;
+            return stream<A>(this->impl_.once());
         }
 
         /*!
@@ -926,11 +910,7 @@ namespace sodium {
          * longer referenced.
          */
         stream<A> add_cleanup(const std::function<void()>& cleanup) const {
-            transaction trans;
-            stream<A> sa(
-                add_cleanup_(trans.impl(), new std::function<void()>(cleanup)));
-            trans.close();
-            return sa;
+            return stream<A>(this->impl_.add_cleanup(cleanup));
         }
     };  // end class stream
 
@@ -987,21 +967,15 @@ namespace sodium {
         stream_sink(const impl::StreamSink<A>& impl_) : impl_(impl_), stream(impl_.stream()) {}
 
     public:
-        stream_sink() {
-            *static_cast<stream<A>*>(this) =
-                stream<A>(impl.construct()).coalesce([](const A&, const A& b) {
-                    return b;
-                });
+        stream_sink(): stream_sink(impl::StreamSink<A>(impl::sodium_ctx)) {
         }
 
-        stream_sink(const std::function<A(const A&, const A&)>& f) {
-            *static_cast<stream<A>*>(this) =
-                stream<A>(impl.construct()).coalesce(f);
+        stream_sink(const std::function<A(const A&, const A&)>& f): stream_sink(impl::StreamSink<A>(impl::sodium_ctx, f)) {
         }
 
         void send(const A& a) const {
             transaction trans;
-            if (trans.impl()->inCallback > 0)
+            if (trans.is_in_callback())
                 SODIUM_THROW(
                     "You are not allowed to use send() inside a Sodium "
                     "callback");
@@ -1011,11 +985,11 @@ namespace sodium {
 
         void send(A&& a) const {
             transaction trans;
-            if (trans.impl()->inCallback > 0)
+            if (trans.is_in_callback())
                 SODIUM_THROW(
                     "You are not allowed to use send() inside a Sodium "
                     "callback");
-            impl.send(trans.impl(), light_ptr::create<A>(std::move(a)));
+            impl_.send(std::move(a));
             trans.close();
         }
     };
@@ -1055,11 +1029,7 @@ namespace sodium {
         cell_sink(const A& initA): impl_(impl::sodium_ctx, initA) {
         }
 
-        cell_sink(A&& initA) {
-            transaction trans;
-            this->impl = SODIUM_SHARED_PTR<impl::cell_impl>(
-                hold(trans.impl(), light_ptr::create<A>(std::move(initA)), e));
-            trans.close();
+        cell_sink(A&& initA): impl_(impl::sodium_ctx, std::move(initA)) {
         }
 
         void send(const A& a) const { impl_.send(a); }
@@ -1110,37 +1080,11 @@ namespace sodium {
             : impl_(impl_), stream(impl_.stream()) {}
 
     public:
-        stream_loop() {
-            SODIUM_SHARED_PTR<std::function<void()>*> pKill(
-                new std::function<void()>*(new std::function<void()>([]() {})));
-            SODIUM_SHARED_PTR<info> i_(new info(pKill));
-
-            SODIUM_TUPLE<impl::stream_, SODIUM_SHARED_PTR<impl::node>> p =
-                impl::unsafe_new_stream();
-            i_->target = SODIUM_TUPLE_GET<1>(p);
-            *this = stream_loop<A>(SODIUM_TUPLE_GET<0>(p).unsafe_add_cleanup(
-                                       new std::function<void()>([pKill]() {
-                                           std::function<void()>* kill = *pKill;
-                                           if (kill) (*kill)();
-                                           delete kill;
-                                       })),
-                                   i_);
+        stream_loop(): stream_loop(impl::StreamLoop<A>(impl::sodium_ctx)) {
         }
 
         void loop(const stream<A>& e) {
-            if (!i->looped) {
-                transaction trans;
-                SODIUM_SHARED_PTR<impl::node> target(i->target);
-                *i->pKill = e.listen_raw(trans.impl(), target, false);
-                i->looped = true;
-                trans.close();
-            } else {
-#if defined(SODIUM_NO_EXCEPTIONS)
-                abort();
-#else
-                SODIUM_THROW("stream_loop looped back more than once");
-#endif
-            }
+            impl_.loop(e.impl_);
         }
     };
 
@@ -1160,19 +1104,11 @@ namespace sodium {
 
     public:
         cell_loop()
-            : cell<A>(impl_.cell_()),
-              pLooped(new SODIUM_SHARED_PTR<impl::cell_impl>) {
-            this->impl =
-                SODIUM_SHARED_PTR<impl::cell_impl>(new impl::cell_impl_loop(
-                    elp, pLooped, SODIUM_SHARED_PTR<impl::cell_impl>()));
+            : impl_(impl::sodium_ctx), cell<A>(impl_.cell()) {
         }
 
         void loop(const cell<A>& b) {
-            elp.loop(b.updates());
-            *pLooped = b.impl;
-            // TO DO: This keeps the memory allocated in a loop. Figure out how
-            // to break the loop.
-            this->impl->parent = b.impl;
+            this->impl_.loop(b.impl_);
         }
     };
 

@@ -148,6 +148,11 @@ public:
             }
         });
     }
+
+    template <typename CLEANUP>
+    Stream<A> add_cleanup(CLEANUP cleanup) const {
+        // TODO: Implement this
+    }
 };
 
 template <typename A>

@@ -10,7 +10,7 @@ struct TestStruct {
     int b;
 };
 
-void test() {
+int test() {
     sodium::impl::Lazy<int> a([]() { return 1; });
     const int& b = *a;
     sodium::impl::Lazy<TestStruct> c([]() { return TestStruct(); });
