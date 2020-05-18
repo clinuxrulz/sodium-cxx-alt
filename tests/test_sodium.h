@@ -69,9 +69,11 @@ class test_sodium : public CppUnit::TestFixture {
     CPPUNIT_TEST(lift_from_simultaneous);
     CPPUNIT_TEST(stream_sink_combining);
     CPPUNIT_TEST(cant_send_in_handler);
+    /* TODO: router
     CPPUNIT_TEST(router1);
     CPPUNIT_TEST(router2);
     CPPUNIT_TEST(router_loop1);
+    */
     CPPUNIT_TEST(snapshot_initial_value);
     CPPUNIT_TEST_SUITE_END();
 
