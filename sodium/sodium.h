@@ -116,7 +116,6 @@ namespace sodium {
         impl::Cell<A> impl_;
         
             protected:
-        cell() {}
         cell(impl::Cell<A> impl_)
             : impl_(impl_) {}
 
@@ -638,10 +637,7 @@ namespace sodium {
          */
         stream<A> merge(const stream<A>& s,
                         const std::function<A(const A&, const A&)>& f) const {
-            transaction trans;
-            stream<A> sa = stream<A>(merge_(trans.impl(), s)).coalesce(f);
-            trans.close();
-            return sa;
+            return stream<A>(this->impl_.merge(s.impl_, f));
         }
 
         /*!
@@ -979,7 +975,7 @@ namespace sodium {
                 SODIUM_THROW(
                     "You are not allowed to use send() inside a Sodium "
                     "callback");
-            impl.send(trans.impl(), light_ptr::create<A>(a));
+            this->impl_.send(a);
             trans.close();
         }
 
@@ -989,7 +985,7 @@ namespace sodium {
                 SODIUM_THROW(
                     "You are not allowed to use send() inside a Sodium "
                     "callback");
-            impl_.send(std::move(a));
+            this->impl_.send(std::move(a));
             trans.close();
         }
     };
@@ -1026,10 +1022,10 @@ namespace sodium {
         cell_sink(impl::CellSink<A> impl_) : impl_(impl_), cell<A>(impl_.cell()) {}
 
     public:
-        cell_sink(const A& initA): impl_(impl::sodium_ctx, initA) {
+        cell_sink(const A& initA): cell_sink(impl::CellSink<A>(impl::sodium_ctx, initA)) {
         }
 
-        cell_sink(A&& initA): impl_(impl::sodium_ctx, std::move(initA)) {
+        cell_sink(A&& initA): cell_sink(impl::CellSink<A>(impl::sodium_ctx, std::move(initA))) {
         }
 
         void send(const A& a) const { impl_.send(a); }
