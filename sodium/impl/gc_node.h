@@ -38,25 +38,25 @@ typedef struct GcCtx {
 
     void add_possible_root(const GcNode& node) const;
 
-    void collect_cycles();
+    void collect_cycles() const;
 
 private:
 
-    void mark_roots();
+    void mark_roots() const;
 
-    void mark_gray(GcNode& s);
+    void mark_gray(GcNode& s) const;
 
-    void scan_roots();
+    void scan_roots() const;
 
-    void scan(GcNode& s);
+    void scan(GcNode& s) const;
 
-    void scan_black(GcNode& s);
+    void scan_black(GcNode& s) const;
 
-    void reset_ref_count_adj(GcNode& s);
+    void reset_ref_count_adj(GcNode& s) const;
 
-    void collect_roots();
+    void collect_roots() const;
 
-    void collect_white(GcNode& s, std::vector<GcNode>& white);
+    void collect_white(GcNode& s, std::vector<GcNode>& white) const;
 } GcCtx;
 
 struct GcNodeData;

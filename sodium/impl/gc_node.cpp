@@ -20,7 +20,7 @@ void GcCtx::add_possible_root(const GcNode& node) const {
     this->data->roots.push_back(node);
 }
 
-void GcCtx::collect_cycles() {
+void GcCtx::collect_cycles() const {
     do {
         this->mark_roots();
         this->scan_roots();
@@ -28,7 +28,7 @@ void GcCtx::collect_cycles() {
     } while (this->data->roots.size() != 0);
 }
 
-void GcCtx::mark_roots() {
+void GcCtx::mark_roots() const {
     std::vector<GcNode> old_roots;
     old_roots.swap(this->data->roots);
     std::vector<GcNode> new_roots;
@@ -46,7 +46,7 @@ void GcCtx::mark_roots() {
     this->data->roots.swap(new_roots);
 }
 
-void GcCtx::mark_gray(GcNode& s) {
+void GcCtx::mark_gray(GcNode& s) const {
     if (s.data->color == Color::Gray) {
         return;
     }
@@ -58,7 +58,7 @@ void GcCtx::mark_gray(GcNode& s) {
     });
 }
 
-void GcCtx::scan_roots() {
+void GcCtx::scan_roots() const {
     std::vector<GcNode>& roots = this->data->roots;
     for (auto root = roots.begin(); root != roots.end(); ++root) {
         this->scan(*root);
@@ -68,7 +68,7 @@ void GcCtx::scan_roots() {
     }
 }
 
-void GcCtx::scan(GcNode& s) {
+void GcCtx::scan(GcNode& s) const {
     if (s.data->color != Color::Gray) {
         return;
     }
@@ -82,7 +82,7 @@ void GcCtx::scan(GcNode& s) {
     }
 }
 
-void GcCtx::scan_black(GcNode& s) {
+void GcCtx::scan_black(GcNode& s) const {
     s.data->color = Color::Black;
     s.trace([this](GcNode& t) {
         if (t.data->color != Color::Black) {
@@ -91,7 +91,7 @@ void GcCtx::scan_black(GcNode& s) {
     });
 }
 
-void GcCtx::reset_ref_count_adj(GcNode& s) {
+void GcCtx::reset_ref_count_adj(GcNode& s) const {
     if (s.data->visited) {
         return;
     }
@@ -103,7 +103,7 @@ void GcCtx::reset_ref_count_adj(GcNode& s) {
     s.data->visited = false;
 }
 
-void GcCtx::collect_roots() {
+void GcCtx::collect_roots() const {
     std::vector<GcNode> white;
     std::vector<GcNode> roots;
     roots.swap(this->data->roots);
@@ -125,7 +125,7 @@ void GcCtx::collect_roots() {
     }
 }
 
-void GcCtx::collect_white(GcNode& s, std::vector<GcNode>& white) {
+void GcCtx::collect_white(GcNode& s, std::vector<GcNode>& white) const {
     if (s.data->color == Color::White) {
         s.data->color = Color::Black;
         s.trace([this, &white](GcNode& t) {

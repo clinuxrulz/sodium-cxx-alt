@@ -123,9 +123,9 @@ namespace sodium {
         /*!
          * Constant value.
          */
-        cell(const A& a) : impl::cell_(light_ptr::create<A>(a)) {}
+        cell(const A& a) : impl_(impl::sodium_ctx, a) {}
 
-        cell(A&& a) : impl::cell_(light_ptr::create<A>(std::move(a))) {}
+        cell(A&& a) : impl_(impl::sodium_ctx, std::move(a)) {}
 
         /*!
          * Sample the value of this cell.
@@ -497,7 +497,7 @@ namespace sodium {
         /*!
          * The 'never' stream (that never fires).
          */
-        stream() {}
+        stream(): impl_(impl::sodium_ctx) {}
 
     protected:
         impl::Stream<A> impl_;
@@ -673,15 +673,14 @@ namespace sodium {
          */
         cell<A> hold(const A& initA) const {
             transaction trans;
-            cell<A> ca(hold_(trans.impl(), light_ptr::create<A>(initA)));
+            cell<A> ca(impl::Cell<A>(impl::sodium_ctx, initA));
             trans.close();
             return ca;
         }
 
         cell<A> hold(A&& initA) const {
             transaction trans;
-            cell<A> ca(
-                hold_(trans.impl(), light_ptr::create<A>(std::move(initA))));
+            cell<A> ca(impl::Cell<A>(impl::sodium_ctx, std::move(initA)));
             trans.close();
             return ca;
         }
@@ -1048,16 +1047,12 @@ namespace sodium {
      */
     template <typename A> class cell_sink : public cell<A> {
     private:
-        stream_sink<A> e;
+        impl::CellSink<A> impl_;
 
-        cell_sink(const cell<A>& beh) : cell<A>(beh) {}
+        cell_sink(impl::CellSink<A> impl_) : impl_(impl_), cell<A>(impl_.cell()) {}
 
     public:
-        cell_sink(const A& initA) {
-            transaction trans;
-            this->impl = SODIUM_SHARED_PTR<impl::cell_impl>(
-                hold(trans.impl(), light_ptr::create<A>(initA), e));
-            trans.close();
+        cell_sink(const A& initA): impl_(impl::sodium_ctx, initA) {
         }
 
         cell_sink(A&& initA) {
@@ -1067,9 +1062,9 @@ namespace sodium {
             trans.close();
         }
 
-        void send(const A& a) const { e.send(a); }
+        void send(const A& a) const { impl_.send(a); }
 
-        void send(A&& a) const { e.send(std::move(a)); }
+        void send(A&& a) const { impl_.send(std::move(a)); }
     };
 
     /*!

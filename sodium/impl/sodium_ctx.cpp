@@ -14,11 +14,11 @@ SodiumCtx::SodiumCtx() {
     this->node_ref_count = 0;
 }
 
-GcCtx SodiumCtx::gc_ctx() {
+GcCtx SodiumCtx::gc_ctx() const {
     return this->_gc_ctx;
 }
 
-Node SodiumCtx::null_node() {
+Node SodiumCtx::null_node() const {
     return Node::mk_node(
         *this,
         std::string("null_node"),
@@ -27,22 +27,22 @@ Node SodiumCtx::null_node() {
     );
 }
 
-void SodiumCtx::inc_node_count() {
+void SodiumCtx::inc_node_count() const {
     unsigned int& node_count = *(this->node_count);
     ++node_count;
 }
 
-void SodiumCtx::dec_node_count() {
+void SodiumCtx::dec_node_count() const {
     unsigned int& node_count = *(this->node_count);
     --node_count;
 }
 
-void SodiumCtx::inc_node_ref_count() {
+void SodiumCtx::inc_node_ref_count() const {
     unsigned int& node_ref_count = *(this->node_ref_count);
     ++node_ref_count;
 }
 
-void SodiumCtx::dec_node_ref_count() {
+void SodiumCtx::dec_node_ref_count() const {
     unsigned int& node_ref_count = *(this->node_ref_count);
     --node_ref_count;
 }
@@ -58,7 +58,7 @@ void SodiumCtx::add_dependents_to_changed_nodes(IsNode& node) {
     }
 }
 
-void SodiumCtx::end_of_transaction() {
+void SodiumCtx::end_of_transaction() const {
     this->data->transaction_depth = this->data->transaction_depth + 1;
     this->data->allow_collect_cycles_counter = this->data->allow_collect_cycles_counter + 1;
     while (this->data->changed_nodes.size() != 0) {
@@ -89,7 +89,7 @@ void SodiumCtx::end_of_transaction() {
     }
 }
 
-void SodiumCtx::update_node(Node& node) {
+void SodiumCtx::update_node(Node& node) const {
     if (node.data->visited) {
         return;
     }
@@ -124,7 +124,7 @@ void SodiumCtx::update_node(Node& node) {
     }
 }
 
-void SodiumCtx::collect_cycles() {
+void SodiumCtx::collect_cycles() const {
     this->gc_ctx().collect_cycles();
 }
 

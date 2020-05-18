@@ -28,8 +28,8 @@ public:
         return _stream;
     }
 
-    void send(A a) {
-        StreamSink<A>& this_ = *this;
+    void send(A a) const {
+        StreamSink<A> this_ = *this;
         this->_sodium_ctx.transaction_void([this_, a]() mutable {
             this_._stream.node().data->changed = true;
             this_._sodium_ctx.data->changed_nodes.push_back(this_._stream.box_clone());

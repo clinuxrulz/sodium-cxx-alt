@@ -37,20 +37,20 @@ typedef struct SodiumCtx {
 
     SodiumCtx();
 
-    GcCtx gc_ctx();
+    GcCtx gc_ctx() const;
 
-    Node null_node();
+    Node null_node() const;
 
-    void inc_node_count();
+    void inc_node_count() const;
 
-    void dec_node_count();
+    void dec_node_count() const;
 
-    void inc_node_ref_count();
+    void inc_node_ref_count() const;
 
-    void dec_node_ref_count();
+    void dec_node_ref_count() const;
 
     template<typename K>
-    typename std::result_of<K()>::type transaction(K k) {
+    typename std::result_of<K()>::type transaction(K k) const {
         typedef typename std::result_of<K()>::type R;
         this->data->transaction_depth = this->data->transaction_depth + 1;
         R result = k();
@@ -62,27 +62,27 @@ typedef struct SodiumCtx {
     }
 
     template<typename K>
-    void transaction_void(K k) {
+    void transaction_void(K k) const {
         this->transaction([k]() mutable { k(); return 0; });
     }
 
     void add_dependents_to_changed_nodes(IsNode& node);
 
     template<typename K>
-    void pre_post(K k) {
+    void pre_post(K k) const {
         this->data->pre_post.push_back(std::function<void()>(k));
     }
 
     template<typename K>
-    void post(K k) {
+    void post(K k) const {
         this->data->post.push_back(std::function<void()>(k));
     }
 
-    void end_of_transaction();
+    void end_of_transaction() const;
 
-    void update_node(Node& node);
+    void update_node(Node& node) const;
 
-    void collect_cycles();
+    void collect_cycles() const;
 
     void add_listener_to_keep_alive(Listener& l);
 

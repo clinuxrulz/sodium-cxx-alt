@@ -30,7 +30,7 @@ public:
         return this->_cell;
     }
 
-    void send(A a) {
+    void send(A a) const {
         this->_stream_sink.send(a);
     }
 };
