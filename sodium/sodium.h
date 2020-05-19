@@ -1319,20 +1319,7 @@ namespace sodium {
      * its own transaction so that state is updated separately for each frame.
      */
     template <typename A> stream<A> split(const stream<std::list<A>>& e) {
-        impl::stream_sink_impl impl;
-        stream<A> s(impl.construct());
-        auto kill = e.listen([impl] (const std::list<A>& la) {
-            transaction trans1;
-            trans1.post([impl, la] () {
-                for (auto it = la.begin(); it != la.end(); ++it) {
-                    transaction trans2;
-                    impl.send(trans2.impl(), light_ptr::create<A>(*it));
-                    trans2.close();
-                }
-            });
-            trans1.close();
-        });
-        return s.add_cleanup(kill);
+        return stream<A>(impl::Stream<A>::split(e.impl_));
     }
 
     // New type names:

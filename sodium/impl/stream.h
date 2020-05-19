@@ -2,6 +2,7 @@
 #define __SODIUM_CXX_IMPL_STREAM_H__
 
 #include <functional>
+#include <list>
 
 #include "sodium/impl/lazy.h"
 #include "sodium/impl/node.h"
@@ -112,6 +113,8 @@ public:
     Cell<S> accum_lazy(Lazy<S> init_state, FN fn) const;
 
     Stream<A> defer() const;
+
+    static Stream<A> split(const Stream<std::list<A>>& sxa);
 
     Stream<A> once() const;
 

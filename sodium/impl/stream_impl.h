@@ -207,6 +207,27 @@ Stream<A> Stream<A>::defer() const {
 }
 
 template <typename A>
+Stream<A> Stream<A>::split(const Stream<std::list<A>>& sxa) {
+    SodiumCtx sodium_ctx = this->sodium_ctx();
+    Stream<A> this_ = *this;
+    return this->sodium_ctx().transaction([sodium_ctx, this_]() {
+        StreamSink<A> ss(sodium_ctx);
+        Stream<A> s = ss.stream();
+        WeakStreamSink<A> weak_ss = ss.downgrade();
+        Listener listener = this_.listen_weak([sodium_ctx, weak_ss](const std::list<A>& xs) {
+            boost::optional<StreamSink<A>> ss_op = weak_ss.upgrade();
+            StreamSink<A> ss = *ss_op;
+            for (auto x = xs.c_begin(); x != xs.c_end(); ++x) {
+                A& a = *x;
+                sodium_ctx.post([ss, a] { ss.send(a); });
+            }
+        });
+        s.node().add_keep_alive(listener.gc_node);
+        return s;
+    });
+}
+
+template <typename A>
 Stream<A> Stream<A>::once() const {
     Stream<A> this_ = *this;
     SodiumCtx sodium_ctx = this->sodium_ctx();
