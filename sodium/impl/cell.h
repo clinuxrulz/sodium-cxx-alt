@@ -48,7 +48,12 @@ public:
 
     Cell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value): Cell(mkCell(sodium_ctx, stream, value)) {}
 
-    static Cell<A> mkConstCell(SodiumCtx& sodium_ctx, A value);
+    static Cell<A> mkConstCell(SodiumCtx& sodium_ctx, const A& value) {
+        A value2 = value;
+        return Cell<A>::mkConstCell(sodium_ctx, std::move(value2));
+    }
+
+    static Cell<A> mkConstCell(SodiumCtx& sodium_ctx, A&& value);
 
     static Cell<A> mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value);
 

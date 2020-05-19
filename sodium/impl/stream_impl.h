@@ -59,9 +59,9 @@ Stream<typename std::result_of<FN(const A&)>::type> Stream<A>::map(FN fn) const 
                 this_.sodium_ctx(),
                 "Stream::map",
                 [this_, s, fn]() {
-                    boost::optional<A>& firing_op = this_.data->firing_op;
+                    boost::optional<std::shared_ptr<A>>& firing_op = this_.data->firing_op;
                     if (firing_op) {
-                        s.unwrap()._send(fn(*firing_op));
+                        s.unwrap()._send(fn(**firing_op));
                     }
                 },
                 std::move(dependencies)
@@ -88,7 +88,7 @@ Stream<A> Stream<A>::filter(PRED pred) const {
                 "Stream::filter",
                 [this_, s, pred]() {
                     if (this_.data->firing_op) {
-                        A& firing = *this_.data->firing_op;
+                        A& firing = **this_.data->firing_op;
                         if (pred(firing)) {
                             s.unwrap()._send(firing);
                         }
@@ -123,19 +123,19 @@ Stream<A> Stream<A>::merge(const Stream<A>& s2, FN fn) const {
                 this_.sodium_ctx(),
                 "Stream::merge",
                 [this_, s2, s, fn]() {
-                    boost::optional<A>& firing1_op = this_.data->firing_op;
-                    boost::optional<A>& firing2_op = s2.data->firing_op;
+                    boost::optional<std::shared_ptr<A>>& firing1_op = this_.data->firing_op;
+                    boost::optional<std::shared_ptr<A>>& firing2_op = s2.data->firing_op;
                     if (firing1_op) {
-                        A& firing1 = *firing1_op;
+                        A& firing1 = **firing1_op;
                         if (firing2_op) {
-                            A& firing2 = *firing2_op;
+                            A& firing2 = **firing2_op;
                             s.unwrap()._send(fn(firing1, firing2));
                         } else {
                             s.unwrap()._send(firing1);
                         }
                     } else {
                         if (firing2_op) {
-                            A& firing2 = *firing2_op;
+                            A& firing2 = **firing2_op;
                             s.unwrap()._send(firing2);
                         }
                     }
@@ -241,7 +241,7 @@ Stream<A> Stream<A>::once() const {
                 "Stream::once",
                 [sodium_ctx, this_, s]() {
                     if (this_.data->firing_op) {
-                        A& firing = *this_.data->firing_op;
+                        A& firing = **this_.data->firing_op;
                         Stream<A> s2 = s.unwrap();
                         s2._send(firing);
                         sodium_ctx.post([s2]() mutable {

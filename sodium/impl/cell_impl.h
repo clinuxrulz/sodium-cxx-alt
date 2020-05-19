@@ -51,12 +51,12 @@ template <typename A>
 Cell<A>::Cell(const Cell<A>& ca): data(ca.data), _node(ca._node) {}
 
 template <typename A>
-Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A value) {
+Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A&& value) {
     std::shared_ptr<CellData<A>> cell_data;
     {
         CellData<A>* _cell_data = new CellData<A>(
             Stream<A>(sodium_ctx),
-            Lazy<A>::of_value(value),
+            Lazy<A>::of_value(std::move(value)),
             boost::none
         );
         cell_data = std::unique_ptr<CellData<A>>(_cell_data);
@@ -311,7 +311,7 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
                 [inner_s, sa]() {
                     Stream<A> inner_s2 = *std::get<0>(*inner_s).upgrade2();
                     if (inner_s2.data->firing_op) {
-                        A& firing = *inner_s2.data->firing_op;
+                        A& firing = **inner_s2.data->firing_op;
                         sa.unwrap()._send(firing);
                     }
                 },
@@ -325,7 +325,7 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
                 "switch_s outer node",
                 [sodium_ctx, inner_s, node1, csa_updates]() mutable {
                     if (csa_updates.data->firing_op) {
-                        Stream<A>& firing = *csa_updates.data->firing_op;
+                        Stream<A>& firing = **csa_updates.data->firing_op;
                         sodium_ctx.pre_post([node1, inner_s, firing]() mutable {
                             Stream<A>& inner_s2 = *std::get<0>(*inner_s).upgrade2();
                             node1.remove_dependency(inner_s2);
@@ -375,9 +375,9 @@ Cell<A> Cell<A>::switch_c(const Cell<Cell<A>>& cca) {
                 std::move(node2_deps)
             );
             std::function<void()> node1_update = [sodium_ctx, cca, last_inner_s, node1, node2, sa]() mutable {
-                boost::optional<Cell<A>> firing_op = cca.updates().data->firing_op;
+                boost::optional<std::shared_ptr<Cell<A>>>& firing_op = cca.updates().data->firing_op;
                 if (firing_op) {
-                    Cell<A>& firing = *firing_op;
+                    Cell<A>& firing = **firing_op;
                     // will be overwriten by node2 firing if there is one
                     sodium_ctx.update_node(firing.updates().node());
                     Stream<A> sa2 = sa.unwrap();
@@ -387,7 +387,7 @@ Cell<A> Cell<A>::switch_c(const Cell<Cell<A>>& cca) {
                     node2.data->changed = true;
                     Stream<A> new_inner_s = firing.updates();
                     if (new_inner_s.data->firing_op) {
-                        A& firing2 = *new_inner_s.data->firing_op;
+                        A& firing2 = **new_inner_s.data->firing_op;
                         sa2._send(firing2);
                     }
                     WeakStream<A>& last_inner_s2 = std::get<0>(*last_inner_s);
@@ -404,7 +404,7 @@ Cell<A> Cell<A>::switch_c(const Cell<Cell<A>>& cca) {
                 WeakStream<A>& last_inner_s2 = std::get<0>(*last_inner_s);
                 Stream<A> last_inner_s3 = *last_inner_s2.upgrade2();
                 if (last_inner_s3.data->firing_op) {
-                    A& firing = *last_inner_s3.data->firing_op;
+                    A& firing = **last_inner_s3.data->firing_op;
                     sa.unwrap()._send(firing);
                 }
             };

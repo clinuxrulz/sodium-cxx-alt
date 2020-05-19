@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 
 #include "sodium/impl/lazy.h"
 #include "sodium/impl/node.h"
@@ -14,7 +15,7 @@ namespace impl {
 template <typename A>
 class StreamData {
 public:
-    boost::optional<A> firing_op;
+    boost::optional<std::shared_ptr<A>> firing_op;
     SodiumCtx sodium_ctx;
     boost::optional<std::function<A(const A&,const A&)>> coalescer_op;
 };
@@ -134,7 +135,7 @@ public:
             if (this->data->coalescer_op) {
                 std::function<A(const A&, const A&)>& coalescer = *this->data->coalescer_op;
                 if (this->data->firing_op) {
-                    A& firing = *this->data->firing_op;
+                    A& firing = **this->data->firing_op;
                     this->data->firing_op = boost::optional<A>(coalescer(firing, a));
                 } else {
                     this->data->firing_op = boost::optional<A>(a);

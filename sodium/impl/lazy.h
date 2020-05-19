@@ -17,6 +17,9 @@ struct LazyData {
 
 template <typename A>
 class Lazy {
+private:
+    Lazy(std::shared_ptr<LazyData<A>> data, int unused): data(data) {}
+
 public:
     std::shared_ptr<LazyData<A>> data;
 
@@ -29,8 +32,14 @@ public:
         this->data = std::unique_ptr<LazyData<A>>(data);
     }
 
-    static Lazy<A> of_value(A a) {
+    static Lazy<A> of_value(const A& a) {
         return Lazy([a]() { return a; });
+    }
+
+    static Lazy<A> of_value(A&& a) {
+        LazyData<A>* data = new LazyData<A>();
+        data->value_op = boost::optional<A>(std::move(a));
+        return Lazy<A>(std::unique_ptr<LazyData<A>>(data), 0);
     }
 
     Lazy<A>& operator=(const Lazy<A>& a) {
