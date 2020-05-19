@@ -34,6 +34,10 @@ void IsNode::remove_dependency(const IsNode& dependency) {
     }
 }
 
+void IsNode::add_keep_alive(const GcNode& gc_node) const {
+    this->node().data->keep_alive.push_back(gc_node);
+}
+
 void Node::add_update_dependency(Dep update_dependency) {
     this->data->update_dependencies.push_back(update_dependency);
 }

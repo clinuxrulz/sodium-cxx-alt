@@ -37,7 +37,7 @@ public:
         });
     }
 
-    WeakStreamSink<A> downgrade();
+    WeakStreamSink<A> downgrade() const;
 };
 
 template <typename A>
@@ -49,7 +49,7 @@ public:
     WeakStreamSink(WeakStream<A> stream, SodiumCtx sodium_ctx)
     : _stream(stream), sodium_ctx(sodium_ctx) {}
 
-    boost::optional<StreamSink<A>> upgrade() {
+    boost::optional<StreamSink<A>> upgrade() const {
         boost::optional<Stream<A>> stream_op = this->_stream.upgrade2();
         if (stream_op) {
             Stream<A>& stream = *stream_op;
@@ -61,7 +61,7 @@ public:
 };
 
 template <typename A>
-WeakStreamSink<A> StreamSink<A>::downgrade() {
+WeakStreamSink<A> StreamSink<A>::downgrade() const {
     WeakStream<A> stream = this->_stream.downgrade2();
     SodiumCtx sodium_ctx = this->_sodium_ctx;
     return WeakStreamSink<A>(stream, sodium_ctx);

@@ -90,7 +90,7 @@ void StreamLoop<A>::loop(const Stream<A>& s) {
     WeakStream<A> s_out = this->data->stream.downgrade2();
     this->data->stream.node().data->update = [s, s_out]() mutable {
         if (s.data->firing_op) {
-            A& firing = *s.data->firing_op;
+            A& firing = **s.data->firing_op;
             (*s_out.upgrade2())._send(firing);
         }
     };

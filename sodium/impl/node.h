@@ -39,6 +39,8 @@ public:
     void add_dependency(const IsNode& dependency);
 
     void remove_dependency(const IsNode& dependency);
+
+    void add_keep_alive(const GcNode& gc_node) const;
 };
 
 class IsWeakNode {

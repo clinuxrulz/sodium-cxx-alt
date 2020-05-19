@@ -21,10 +21,10 @@ template <typename A>
 class CellData {
 public:
     Stream<A> stream;
-    Lazy<A> value;
-    boost::optional<A> next_value_op;
+    Lazy<std::shared_ptr<A>> value;
+    boost::optional<std::shared_ptr<A>> next_value_op;
 
-    CellData(Stream<A> stream, Lazy<A> value, boost::optional<A> next_value_op)
+    CellData(Stream<A> stream, Lazy<std::shared_ptr<A>> value, boost::optional<std::shared_ptr<A>> next_value_op)
     : stream(stream), value(value), next_value_op(next_value_op)
     {}
 };
@@ -74,9 +74,9 @@ Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A&& value) {
 
 template <typename A>
 Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) {
-    Lazy<A> init_value =
+    Lazy<std::shared_ptr<A>> init_value =
         stream.data->firing_op ?
-            Lazy<A>::of_value(*stream.data->firing_op) :
+            Lazy<std::shared_ptr<A>>::of_value(*stream.data->firing_op) :
             value;
     std::shared_ptr<CellData<A>> cell_data =
         std::unique_ptr<CellData<A>>(new CellData<A>(
@@ -93,13 +93,13 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
         [sodium_ctx, stream, c_forward_ref]() mutable {
             Cell<A> c = c_forward_ref.unwrap();
             if (stream.data->firing_op) {
-                A& firing = *stream.data->firing_op;
+                A& firing = **stream.data->firing_op;
                 bool is_first = !c.data->next_value_op;
                 c.data->next_value_op = boost::optional<A>(firing);
                 if (is_first) {
                     sodium_ctx.post([c]() {
                         if (c.data->next_value_op) {
-                            c.data->value = Lazy<A>::of_value(*c.data->next_value_op);
+                            c.data->value = Lazy<std::shared_ptr<A>>::of_value(*c.data->next_value_op);
                             c.data->next_value_op = boost::none;
                         }
                     });
@@ -134,7 +134,7 @@ WeakCell<A> Cell<A>::downgrade() const {
 
 template <typename A>
 A Cell<A>::sample() const {
-    return *this->data->value;
+    return **this->data->value;
 }
 
 template <typename A>
@@ -155,7 +155,7 @@ Stream<A> Cell<A>::value() const {
         Stream<A> s1 = this_.updates();
         Stream<A> spark(sodium_ctx);
         sodium_ctx.post([sodium_ctx, this_, spark]() mutable {
-            const A& fire = *this_.data->value;
+            const A& fire = **this_.data->value;
             sodium_ctx.transaction_void([sodium_ctx, spark, fire]() mutable {
                 Node node = spark.node();
                 node.data->changed = true;
