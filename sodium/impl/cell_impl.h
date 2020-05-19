@@ -134,7 +134,7 @@ WeakCell<A> Cell<A>::downgrade() const {
 }
 
 template <typename A>
-A Cell<A>::sample() const {
+A& Cell<A>::sample() const {
     return **this->data->value;
 }
 

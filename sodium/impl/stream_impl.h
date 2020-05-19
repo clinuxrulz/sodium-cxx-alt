@@ -159,8 +159,12 @@ Cell<A> Stream<A>::hold_lazy(Lazy<A> a) const {
 }
 
 template <typename A>
-template <typename B, typename S, typename FN>
-Stream<B> Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
+template <typename S, typename FN>
+Stream<typename std::tuple_element<
+        0, typename std::result_of<FN(A, S)>::type>::type>
+Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
+    typedef typename std::tuple_element<
+        0, typename std::result_of<FN(A, S)>::type>::type B;
     SodiumCtx sodium_ctx = this->sodium_ctx();
     Stream<A> sa = *this;
     return this->sodium_ctx().transaction([sodium_ctx, sa, init_state, fn]() {
@@ -271,7 +275,7 @@ Listener Stream<A>::_listen(K k, bool is_weak) const {
         "Stream::listen",
         [this_, k]() {
             if (this_.data->firing_op) {
-                A& firing = *this_.data->firing_op;
+                A& firing = **this_.data->firing_op;
                 k(firing);
             }
         },

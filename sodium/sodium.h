@@ -9,6 +9,7 @@
 #include "sodium/impl/cell_sink.h"
 #include "sodium/impl/dep.h"
 #include "sodium/impl/lambda.h"
+#include "sodium/impl/lazy.h"
 #include "sodium/impl/stream.h"
 #include "sodium/impl/stream_impl.h"
 #include "sodium/impl/stream_loop.h"
@@ -410,6 +411,9 @@ namespace sodium {
         collect_lazy(const lazy<S>& initS, const Fn& f) const {
             typedef typename std::tuple_element<
                 0, typename std::result_of<Fn(A, S)>::type>::type B;
+            // TODO: Implement this
+            SODIUM_THROW("not implemented yet!");
+            /*
             transaction trans1;
             auto ea = updates().coalesce(
                 [](const A&, const A& snd) -> A { return snd; });
@@ -430,6 +434,7 @@ namespace sodium {
                           }));
             trans1.close();
             return ca;
+            */
         }
 
         /**
@@ -737,17 +742,7 @@ namespace sodium {
         collect_lazy(const lazy<S>& initS, Fn f) const {
             typedef typename std::tuple_element<
                 0, typename std::result_of<Fn(A, S)>::type>::type B;
-            transaction trans1;
-            SODIUM_SHARED_PTR<lazy<S>> pState(new lazy<S>(initS));
-            SODIUM_TUPLE<impl::stream_, SODIUM_SHARED_PTR<impl::node>> p =
-                impl::unsafe_new_stream();
-            auto kill = listen_raw(
-                trans1.impl(), std::get<1>(p),
-                new impl::collect_handler<A, S, Fn>(pState, std::move(f)),
-                false);
-            auto sa = SODIUM_TUPLE_GET<0>(p).unsafe_add_cleanup(kill);
-            trans1.close();
-            return sa;
+            return stream<B>(this->impl_.collect_lazy(impl::Lazy<A>([initS]() { return initS(); }), f));
         }
 
         /*!

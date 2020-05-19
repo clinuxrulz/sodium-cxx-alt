@@ -83,7 +83,7 @@ public:
         return this->_node.data->sodium_ctx;
     }
 
-    WeakStream<A> downgrade2() {
+    WeakStream<A> downgrade2() const {
         return WeakStream<A>(this->data, this->_node.downgrade2());
     }
 
@@ -107,8 +107,10 @@ public:
 
     Cell<A> hold_lazy(Lazy<A> a) const;
 
-    template <typename B, typename S, typename FN>
-    Stream<B> collect_lazy(Lazy<S> init_state, FN fn) const;
+    template <typename S, typename FN>
+    Stream<typename std::tuple_element<
+            0, typename std::result_of<FN(A, S)>::type>::type>
+    collect_lazy(Lazy<S> init_state, FN fn) const;
 
     template <typename S, typename FN>
     Cell<S> accum_lazy(Lazy<S> init_state, FN fn) const;
@@ -136,12 +138,16 @@ public:
                 std::function<A(const A&, const A&)>& coalescer = *this->data->coalescer_op;
                 if (this->data->firing_op) {
                     A& firing = **this->data->firing_op;
-                    this->data->firing_op = boost::optional<A>(coalescer(firing, a));
+                    A firing2 = coalescer(firing, std::move(a));
+                    boost::optional<std::shared_ptr<A>> firing_op = boost::optional<std::shared_ptr<A>>(std::unique_ptr<A>(new A(firing2)));
+                    this->data->firing_op = firing_op;
                 } else {
-                    this->data->firing_op = boost::optional<A>(a);
+                    boost::optional<std::shared_ptr<A>> firing_op = boost::optional<std::shared_ptr<A>>(std::unique_ptr<A>(new A(std::move(a))));
+                    this->data->firing_op = firing_op;
                 }
             } else {
-                this->data->firing_op = boost::optional<A>(a);
+                boost::optional<std::shared_ptr<A>> firing_op = boost::optional<std::shared_ptr<A>>(std::unique_ptr<A>(new A(std::move(a))));
+                this->data->firing_op = firing_op;
             }
             this->node().data->changed = true;
             if (is_first) {
@@ -193,7 +199,7 @@ public:
         }
     }
 
-    boost::optional<Stream<A>> upgrade2() {
+    boost::optional<Stream<A>> upgrade2() const {
         std::shared_ptr<StreamData<A>> data = this->data.lock();
         boost::optional<Node> node_op = this->_node.upgrade2();
         if (data && node_op) {

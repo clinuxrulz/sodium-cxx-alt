@@ -53,7 +53,7 @@ public:
         boost::optional<Stream<A>> stream_op = this->_stream.upgrade2();
         if (stream_op) {
             Stream<A>& stream = *stream_op;
-            return boost::optional<StreamSink<A>>(StreamSink<A>(stream));
+            return boost::optional<StreamSink<A>>(StreamSink<A>(stream, this->_sodium_ctx));
         } else {
             return boost::none;
         }

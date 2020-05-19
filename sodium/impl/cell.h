@@ -63,7 +63,7 @@ public:
 
     WeakCell<A> downgrade() const;
 
-    A sample() const;
+    A& sample() const;
 
     Lazy<A> sample_lazy() const;
 
