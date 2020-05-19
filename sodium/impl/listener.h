@@ -25,7 +25,7 @@ typedef struct Listener {
 
     static Listener mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node);
 
-    void unlisten();
+    void unlisten() const;
 } Listener;
 
 }

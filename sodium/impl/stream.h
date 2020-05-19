@@ -86,7 +86,7 @@ public:
     }
 
     template <typename B, typename FN>
-    Stream<typename std::result_of<FN(const A&, const B&)>> snapshot(const Cell<B>& cb, FN fn) const;
+    Stream<typename std::result_of<FN(const A&, const B&)>::type> snapshot(const Cell<B>& cb, FN fn) const;
 
     template <typename FN>
     Stream<typename std::result_of<FN(const A&)>::type> map(FN f) const;

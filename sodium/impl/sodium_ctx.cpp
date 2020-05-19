@@ -128,11 +128,11 @@ void SodiumCtx::collect_cycles() const {
     this->gc_ctx().collect_cycles();
 }
 
-void SodiumCtx::add_listener_to_keep_alive(Listener& l) {
+void SodiumCtx::add_listener_to_keep_alive(const Listener& l) const {
     this->data->keep_alive.push_back(l);
 }
 
-void SodiumCtx::remove_listener_from_keep_alive(Listener& l) {
+void SodiumCtx::remove_listener_from_keep_alive(const Listener& l) const {
     std::vector<Listener>& keep_alive = this->data->keep_alive;
     for (auto l2 = keep_alive.begin(); l2 != keep_alive.end(); ++l2) {
         if (l2->data == l.data) {

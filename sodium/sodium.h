@@ -161,27 +161,7 @@ namespace sodium {
         template <typename Fn>
         cell<typename std::result_of<Fn(A)>::type> map(const Fn& f) const {
             typedef typename std::result_of<Fn(A)>::type B;
-            transaction trans;
-
-            cell<B> cmapped;
-#if defined(SODIUM_CONSTANT_OPTIMIZATION)
-            boost::optional<light_ptr> ca = this->get_constant_value();
-            if (ca)
-                cmapped = impl::cell_(
-                    light_ptr::create<B>(f(*ca.get().cast_ptr<A>(nullptr))));
-            else {
-#endif
-                auto this_impl = this->impl;
-                cmapped = map_(trans.impl(), impl::mk_map_handler<A>(f), this->updates_()).hold_lazy_(
-                    trans.impl(), [f, this_impl] () -> light_ptr {
-                        return impl::detype<A, Fn>(f, this_impl->sample());
-                    });
-#if defined(SODIUM_CONSTANT_OPTIMIZATION)
-            }
-#endif
-
-            trans.close();
-            return cell<B>(cmapped);
+            return cell<B>(this->impl_.map(f));
         }
 
         /*!
@@ -501,21 +481,18 @@ namespace sodium {
          * High-level interface to obtain an stream's value.
          */
         template <typename F>
-        std::function<void()> listen(
-            F handle) const {
-            transaction trans1;
-            std::function<void()>* pKill = listen_raw(
-                trans1.impl(),
-                SODIUM_SHARED_PTR<impl::node>(new impl::node(SODIUM_IMPL_RANK_T_MAX)),
-                new impl::listener_handler<A, F>(handle),
-                false);
-            trans1.close();
-            if (pKill != NULL) {
-                std::function<void()> kill(*pKill);
-                delete pKill;
-                return kill;
-            } else
-                return []() {};
+        std::function<void()> listen(F handle) const {
+            impl::Listener l = this->impl_.listen(handle);
+            return std::function<void()>([l]() { l.unlisten(); });
+        };
+
+        /*!
+         * High-level interface to obtain an stream's value.
+         */
+        template <typename F>
+        std::function<void()> listen_weak(F handle) const {
+            impl::Listener l = this->impl_.listen_weak(handle);
+            return std::function<void()>([l]() { l.unlisten(); });
         };
 
         /*!
@@ -541,12 +518,7 @@ namespace sodium {
          */
         template <typename Fn>
         stream<typename std::result_of<Fn(A)>::type> map(const Fn& f) const {
-            typedef typename std::result_of<Fn(A)>::type B;
-            transaction trans;
-            auto sa = stream<B>(impl::map_(
-                trans.impl(), impl::mk_map_handler<A>(f), *this));
-            trans.close();
-            return sa;
+            return this->impl_.map(f);
         }
 
         /*!
@@ -686,15 +658,7 @@ namespace sodium {
         stream<typename std::result_of<Fn(A, B)>::type> snapshot(
             const cell<B>& beh, const Fn& combine) const {
             typedef typename std::result_of<Fn(A, B)>::type C;
-            transaction trans;
-            auto sa = stream<C>(snapshot_(
-                trans.impl(), beh,
-                [combine](const light_ptr& a, const light_ptr& b) -> light_ptr {
-                    return light_ptr::create<C>(
-                        combine(*a.cast_ptr<A>(NULL), *b.cast_ptr<B>(NULL)));
-                }));
-            trans.close();
-            return sa;
+            return stream<C>(this->impl_.snapshot(beh.impl_, combine));
         }
 
         template <typename B, typename C, typename Fn>
@@ -995,20 +959,11 @@ namespace sodium {
      */
     template <typename A>
     stream<A> filter_optional(const stream<boost::optional<A>>& input) {
-        transaction trans;
-        stream<A> sa = impl::filter_optional_(
-            trans.impl(), input,
-            [] (const light_ptr& poa) -> boost::optional<light_ptr> {
-                const boost::optional<A>& oa =
-                    *poa.cast_ptr<boost::optional<A>>(NULL);
-                if (oa)
-                    return boost::optional<light_ptr>(
-                        light_ptr::create<A>(oa.get()));
-                else
-                    return boost::optional<light_ptr>();
-            });
-        trans.close();
-        return sa;
+        return stream<A>(
+            input
+                .filter([](const boost::optional<A>& x) { return (bool)x; })
+                .map([](const boost::optional<A>& x) { return *x; })
+        );
     }
 
     /*!
@@ -1040,21 +995,7 @@ namespace sodium {
     template <typename A, typename B>
     cell<B> apply(const cell<std::function<B(const A&)>>& bf,
                   const cell<A>& ba) {
-        transaction trans;
-        cell<B> cb = cell<B>(impl::apply(
-            trans.impl(),
-            impl::map_(trans.impl(),
-                [](const light_ptr& pf) -> light_ptr {
-                    const std::function<B(const A&)>& f =
-                        *pf.cast_ptr<std::function<B(const A&)>>(NULL);
-                    return light_ptr::create<
-                        std::function<light_ptr(const light_ptr&)>>(
-                        SODIUM_DETYPE_FUNCTION1_OLD(A, B, f));
-                },
-                bf),
-            ba));
-        trans.close();
-        return cb;
+        return cell<B>(bf.impl_.lift2(ba.impl_, [](const std::function<B(const A&)> f, const A& a) { return f(a); }));
     }
 
     /*!
@@ -1115,10 +1056,7 @@ namespace sodium {
      * stream won't come through until the following transaction.
      */
     template <typename A> stream<A> switch_s(const cell<stream<A>>& bea) {
-        transaction trans;
-        stream<A> sa(impl::switch_s(trans.impl(), bea));
-        trans.close();
-        return sa;
+        return stream<A>(impl::Cell<A>::switch_s(bea.impl_.map([](const stream<A>& sa) { return sa.impl_; })));
     }
 
     template <typename A>
@@ -1135,10 +1073,7 @@ namespace sodium {
      * Cell variant of switch.
      */
     template <typename A> cell<A> switch_c(const cell<cell<A>>& bba) {
-        transaction trans;
-        cell<A> ca(impl::switch_c(trans.impl(), bba));
-        trans.close();
-        return ca;
+        return cell<A>(impl::Cell<A>::switch_c(bba.impl_.map([](const cell<A>& ca) { return ca.impl_; })));
     }
 
     template <typename A>

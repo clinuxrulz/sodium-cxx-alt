@@ -46,7 +46,7 @@ Listener Listener::mkListener(SodiumCtx& sodium_ctx, bool is_weak, Node node) {
     return listener;
 }
 
-void Listener::unlisten() {
+void Listener::unlisten() const {
     this->data->node_op = boost::none;
     if (!this->data->is_weak) {
         SodiumCtx& sodium_ctx = this->data->sodium_ctx;

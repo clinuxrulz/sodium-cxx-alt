@@ -84,9 +84,9 @@ typedef struct SodiumCtx {
 
     void collect_cycles() const;
 
-    void add_listener_to_keep_alive(Listener& l);
+    void add_listener_to_keep_alive(const Listener& l) const;
 
-    void remove_listener_from_keep_alive(Listener& l);
+    void remove_listener_from_keep_alive(const Listener& l) const;
 
 } SodiumCtx;
 
