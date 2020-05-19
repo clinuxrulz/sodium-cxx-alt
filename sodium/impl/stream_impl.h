@@ -12,7 +12,7 @@ namespace impl {
 
 template <typename A>
 template <typename MK_NODE>
-Stream<A> Stream<A>::mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node) {
+Stream<A> Stream<A>::mkStream(const SodiumCtx& sodium_ctx, MK_NODE mk_node) {
     StreamWeakForwardRef<A> stream_weak_forward_ref;
     Node node = mk_node(stream_weak_forward_ref);
     std::shared_ptr<StreamData<A>> stream_data;
@@ -169,10 +169,10 @@ Stream<A>::collect_lazy(Lazy<S> init_state, FN fn) const {
     Stream<A> sa = *this;
     return this->sodium_ctx().transaction([sodium_ctx, sa, init_state, fn]() {
         StreamLoop<S> ssl(sodium_ctx);
-        Cell<S> cs = ss.hold_lazy(init_state);
-        Stream<std::pair<B,S>> sbs = sa.snapshot(cs, f);
-        Stream<B> sb = sbs.map([](const std::pair<B,S> x) { return x.first; });
-        Stream<S> ss = sbs.map([](const std::pair<B,S> x) { return x.second; });
+        Cell<S> cs = ssl.stream().hold_lazy(init_state);
+        Stream<std::tuple<B,S>> sbs = sa.snapshot(cs, fn);
+        Stream<B> sb = sbs.map([](const std::tuple<B,S> x) { return std::get<0>(x); });
+        Stream<S> ss = sbs.map([](const std::tuple<B,S> x) { return std::get<1>(x); });
         ssl.loop(ss);
         return sb;
     });

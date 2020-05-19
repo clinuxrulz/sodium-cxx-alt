@@ -25,9 +25,9 @@ public:
 
     StreamLoop(std::shared_ptr<StreamLoopData<A>> data, GcNode gc_node);
 
-    StreamLoop(SodiumCtx& sodium_ctx): StreamLoop(StreamLoop<A>::mkStreamLoop(sodium_ctx)) {}
+    StreamLoop(const SodiumCtx& sodium_ctx): StreamLoop(StreamLoop<A>::mkStreamLoop(sodium_ctx)) {}
 
-    static StreamLoop<A> mkStreamLoop(SodiumCtx& sodium_ctx);
+    static StreamLoop<A> mkStreamLoop(const SodiumCtx& sodium_ctx);
 
     StreamLoop(const StreamLoop<A>& stream_loop);
 

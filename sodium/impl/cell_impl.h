@@ -94,9 +94,9 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
         [sodium_ctx, stream, c_forward_ref]() mutable {
             Cell<A> c = c_forward_ref.unwrap();
             if (stream.data->firing_op) {
-                A& firing = **stream.data->firing_op;
+                std::shared_ptr<A>& firing = *stream.data->firing_op;
                 bool is_first = !c.data->next_value_op;
-                c.data->next_value_op = boost::optional<A>(firing);
+                c.data->next_value_op = boost::optional<std::shared_ptr<A>>(firing);
                 if (is_first) {
                     sodium_ctx.post([c]() {
                         if (c.data->next_value_op) {

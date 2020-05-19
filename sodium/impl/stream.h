@@ -41,7 +41,7 @@ public:
 
     Stream(std::shared_ptr<StreamData<A>> data, Node node): data(data), _node(node) {}
 
-    Stream(SodiumCtx& sodium_ctx)
+    Stream(const SodiumCtx& sodium_ctx)
     : Stream(
         mkStream(
             sodium_ctx,
@@ -61,7 +61,7 @@ public:
     }
 
     template <typename MK_NODE>
-    static Stream<A> mkStream(SodiumCtx& sodium_ctx, MK_NODE mk_node);
+    static Stream<A> mkStream(const SodiumCtx& sodium_ctx, MK_NODE mk_node);
 
     virtual Node node() const {
         return this->_node;
