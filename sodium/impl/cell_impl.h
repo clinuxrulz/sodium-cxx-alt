@@ -54,9 +54,10 @@ template <typename A>
 Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A&& value) {
     std::shared_ptr<CellData<A>> cell_data;
     {
+        std::shared_ptr<A> value2 = std::unique_ptr<A>(new A(std::move(value)));
         CellData<A>* _cell_data = new CellData<A>(
             Stream<A>(sodium_ctx),
-            Lazy<A>::of_value(std::move(value)),
+            Lazy<std::shared_ptr<A>>::of_value(value2),
             boost::none
         );
         cell_data = std::unique_ptr<CellData<A>>(_cell_data);
@@ -77,7 +78,7 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
     Lazy<std::shared_ptr<A>> init_value =
         stream.data->firing_op ?
             Lazy<std::shared_ptr<A>>::of_value(*stream.data->firing_op) :
-            value;
+            Lazy<std::shared_ptr<A>>([value]() { return std::shared_ptr<A>(std::unique_ptr<A>(new A(std::move(*value)))); });
     std::shared_ptr<CellData<A>> cell_data =
         std::unique_ptr<CellData<A>>(new CellData<A>(
             stream,
@@ -139,7 +140,9 @@ A Cell<A>::sample() const {
 
 template <typename A>
 Lazy<A> Cell<A>::sample_lazy() const {
-    return this->data->value;
+    Cell<A> this_ = *this;
+    Lazy<A> l([this_]() { return **this_.data->value; });
+    return l;
 }
 
 template <typename A>

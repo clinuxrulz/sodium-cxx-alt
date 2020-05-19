@@ -32,6 +32,12 @@ public:
         this->data = std::unique_ptr<LazyData<A>>(data);
     }
 
+    static Lazy<A> from_thunk(const std::function<A()>& k) {
+        LazyData<A>* data = new LazyData<A>();
+        data->thunk_op = boost::optional<std::function<A()>>(k);
+        return Lazy<A>(std::unique_ptr<LazyData<A>>(data), 0);
+    }
+
     static Lazy<A> of_value(const A& a) {
         return Lazy([a]() { return a; });
     }
