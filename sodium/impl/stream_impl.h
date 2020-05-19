@@ -214,7 +214,7 @@ Stream<A> Stream<A>::once() const {
         this->sodium_ctx(),
         [sodium_ctx, this_](StreamWeakForwardRef<A> s) {
             std::vector<std::unique_ptr<IsNode>> dependencies;
-            dependencies.push(this_.box_clone());
+            dependencies.push_back(this_.box_clone());
             Node node = Node::mk_node(
                 sodium_ctx,
                 "Stream::once",
@@ -223,10 +223,10 @@ Stream<A> Stream<A>::once() const {
                         A& firing = *this_.data->firing_op;
                         Stream<A> s2 = s.unwrap();
                         s2._send(firing);
-                        sodium_ctx.post([s2]() {
-                            std::vector<std::unique_ptr<IsNode>> deps = box_clone_vec_is_node(s2.node().dependencies);
+                        sodium_ctx.post([s2]() mutable {
+                            std::vector<std::unique_ptr<IsNode>> deps = box_clone_vec_is_node(s2.node().data->dependencies);
                             for (auto dep = deps.begin(); dep != deps.end(); ++dep) {
-                                s2.remove_dependency(*dep);
+                                s2.remove_dependency(**dep);
                             }
                         });
                     }
