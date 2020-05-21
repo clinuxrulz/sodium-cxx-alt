@@ -763,6 +763,9 @@ namespace sodium {
         stream<B> accum_s_lazy(
             const lazy<B>& initB,
             std::function<B(const A&, const B&)> f) const {
+            // TODO: Implement this
+            SODIUM_THROW("Not implemented yet!");
+            /*
             transaction trans1;
             SODIUM_SHARED_PTR<lazy<B>> pState(new lazy<B>(initB));
             SODIUM_TUPLE<impl::stream_, SODIUM_SHARED_PTR<impl::node>> p =
@@ -774,6 +777,7 @@ namespace sodium {
             stream<B> sb(SODIUM_TUPLE_GET<0>(p).unsafe_add_cleanup(kill));
             trans1.close();
             return sb;
+            */
         }
 
         template <typename B>

@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "sodium/config.h"
 #include "sodium/impl/gc_node.h"
 #include "sodium/impl/listener.h"
 
@@ -115,6 +116,7 @@ typedef struct Transaction {
 
     bool is_in_callback() const {
         // TODO: implement this
+        SODIUM_THROW("Not implemented yet!");
     }
 
 } Transaction;

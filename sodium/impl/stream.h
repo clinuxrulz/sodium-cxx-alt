@@ -57,7 +57,7 @@ public:
     Stream(SodiumCtx& sodium_ctx, COALESCER coalescer)
     : Stream(sodium_ctx)
     {
-        this->data->coalescer_op = boost::optional<std::function<A(A&,A&)>>(coalescer);
+        this->data->coalescer_op = boost::optional<std::function<A(const A&,const A&)>>(coalescer);
     }
 
     template <typename MK_NODE>
@@ -162,6 +162,7 @@ public:
     template <typename CLEANUP>
     Stream<A> add_cleanup(CLEANUP cleanup) const {
         // TODO: Implement this
+        SODIUM_THROW("Not implemented yet!");
     }
 };
 

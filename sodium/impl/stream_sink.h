@@ -47,7 +47,7 @@ public:
     SodiumCtx _sodium_ctx;
 
     WeakStreamSink(WeakStream<A> stream, SodiumCtx sodium_ctx)
-    : _stream(stream), sodium_ctx(sodium_ctx) {}
+    : _stream(stream), _sodium_ctx(impl::sodium_ctx) {}
 
     boost::optional<StreamSink<A>> upgrade() const {
         boost::optional<Stream<A>> stream_op = this->_stream.upgrade2();
