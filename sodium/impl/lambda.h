@@ -28,12 +28,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda1<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda1<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda1<FN>& operator<<(Dep dep) {
+    Lambda1<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
@@ -65,12 +65,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda2<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda2<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda2<FN>& operator<<(Dep dep) {
+    Lambda2<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
@@ -101,12 +101,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda3<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda3<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda3<FN>& operator<<(Dep dep) {
+    Lambda3<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
@@ -137,12 +137,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda4<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda4<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda4<FN>& operator<<(Dep dep) {
+    Lambda4<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
@@ -173,12 +173,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda5<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda5<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda5<FN>& operator<<(Dep dep) {
+    Lambda5<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
@@ -210,12 +210,12 @@ public:
     }
 
     template <typename TO_DEP>
-    Lambda6<FN>& operator<<(TO_DEP& to_dep) {
+    Lambda6<FN>& operator<<(const TO_DEP& to_dep) {
         this->deps.push_back(to_dep.to_dep());
         return *this;
     }
 
-    Lambda6<FN>& operator<<(Dep dep) {
+    Lambda6<FN>& operator<<(const Dep& dep) {
         this->deps.push_back(dep);
         return *this;
     }
