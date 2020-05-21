@@ -31,4 +31,4 @@ set( ALL_SOURCES ${SODIUM_TESTS_INCLUDE_FILES} ${SODIUM_TESTS_SOURCE_FILES} )
 
 add_executable( sodium_tests ${ALL_SOURCES} )
 
-target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} )
+target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} ${SODIUM_TESTS_BASE_DIR}/../build/Debug/sodium.lib )
