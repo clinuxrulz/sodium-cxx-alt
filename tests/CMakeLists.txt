@@ -25,8 +25,10 @@ file( GLOB_RECURSE
     ${SODIUM_TESTS_BASE_DIR}/*.cpp
     )
 
-include_directories( ${Boost_INCLUDE_DIR} ${SODIUM_TESTS_BASE_DIR}/.. )
+include_directories( ${Boost_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR} ${SODIUM_TESTS_BASE_DIR}/.. )
 
 set( ALL_SOURCES ${SODIUM_TESTS_INCLUDE_FILES} ${SODIUM_TESTS_SOURCE_FILES} )
 
 add_executable( sodium_tests ${ALL_SOURCES} )
+
+target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} )
