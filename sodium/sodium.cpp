@@ -3,7 +3,7 @@
 namespace sodium {
 
 namespace impl {
-    static SodiumCtx sodium_ctx;
+    SodiumCtx sodium_ctx;
 }
 
 }
