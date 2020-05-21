@@ -8,6 +8,9 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 find_package( Boost REQUIRED )
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
+find_package( CPPUNIT REQUIRED )
+
 if ( MSVC )
     add_compile_options(-bigobj)
 endif ( MSVC )
