@@ -1130,7 +1130,6 @@ void test_sodium::router_loop1()
 }
 */
 
-/* main already defined by CppUnit lib?
 int main(int argc, char* argv[])
 {
     for (int i = 0; i < 1; i++) {
@@ -1140,4 +1139,3 @@ int main(int argc, char* argv[])
     }
     return 0;
 }
-*/

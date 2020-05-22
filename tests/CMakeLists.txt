@@ -20,7 +20,7 @@ file( GLOB
     ${SODIUM_TESTS_BASE_DIR}/*.h
     )
 
-file( GLOB_RECURSE 
+file( GLOB 
     SODIUM_TESTS_SOURCE_FILES
     ${SODIUM_TESTS_BASE_DIR}/*.cpp
     )
