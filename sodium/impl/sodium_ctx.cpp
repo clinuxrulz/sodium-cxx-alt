@@ -8,6 +8,7 @@ namespace impl {
 SodiumCtx::SodiumCtx() {
     SodiumCtxData* data = new SodiumCtxData();
     data->transaction_depth = 0;
+    data->callback_depth = 0;
     data->allow_collect_cycles_counter = 0;
     this->data = std::unique_ptr<SodiumCtxData>(data);
     this->node_count = std::make_shared<unsigned int>(0);
@@ -140,6 +141,10 @@ void SodiumCtx::remove_listener_from_keep_alive(const Listener& l) const {
             break;
         }
     }
+}
+
+InCallback SodiumCtx::in_callback() const {
+    return InCallback(*this);
 }
 
 }

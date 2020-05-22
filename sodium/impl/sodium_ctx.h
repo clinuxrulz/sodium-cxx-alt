@@ -24,11 +24,14 @@ struct SodiumCtxData {
     std::vector<std::unique_ptr<IsNode>> changed_nodes;
     std::vector<std::unique_ptr<IsNode>> visited_nodes;
     unsigned int transaction_depth;
+    unsigned int callback_depth;
     std::vector<std::function<void()>> pre_post;
     std::vector<std::function<void()>> post;
     std::vector<Listener> keep_alive;
     unsigned int allow_collect_cycles_counter;
 };
+
+class InCallback;
 
 typedef struct SodiumCtx {
     std::shared_ptr<SodiumCtxData> data;
@@ -89,7 +92,22 @@ typedef struct SodiumCtx {
 
     void remove_listener_from_keep_alive(const Listener& l) const;
 
+    InCallback in_callback() const;
+
 } SodiumCtx;
+
+class InCallback {
+public:
+    SodiumCtx _sodium_ctx;
+
+    InCallback(const SodiumCtx& sodium_ctx): _sodium_ctx(sodium_ctx) {
+        ++this->_sodium_ctx.data->callback_depth;
+    }
+
+    ~InCallback() {
+        --this->_sodium_ctx.data->callback_depth;
+    }
+};
 
 typedef struct Transaction {
     SodiumCtx sodium_ctx;
@@ -115,8 +133,7 @@ typedef struct Transaction {
     }
 
     bool is_in_callback() const {
-        // TODO: implement this
-        SODIUM_THROW("Not implemented yet!");
+        return this->sodium_ctx.data->callback_depth > 0;
     }
 
 } Transaction;

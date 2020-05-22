@@ -276,6 +276,7 @@ Listener Stream<A>::_listen(K k, bool is_weak) const {
         [this_, k]() {
             if (this_.data->firing_op) {
                 A& firing = **this_.data->firing_op;
+                InCallback in_callback = this_.sodium_ctx().in_callback();
                 k(firing);
             }
         },
