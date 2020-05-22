@@ -45,8 +45,8 @@ public:
     : Stream(
         mkStream(
             sodium_ctx,
-            [this](StreamWeakForwardRef<A> s) {
-                return this->_node.sodium_ctx.null_node();
+            [sodium_ctx](StreamWeakForwardRef<A> s) {
+                return sodium_ctx.null_node();
             }
         )
     )
