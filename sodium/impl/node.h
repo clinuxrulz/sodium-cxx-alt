@@ -139,6 +139,12 @@ public:
             sodium_ctx
         );
         forward_ref->push_back(std::weak_ptr<NodeData>(node_data));
+        for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+            Node dependency2 = (*dependency)->node();
+            dependency2.data->dependents.push_back(node.downgrade());
+        }
+        sodium_ctx.inc_node_ref_count();
+        sodium_ctx.inc_node_count();
         return node;
     }
 
