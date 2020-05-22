@@ -25,10 +25,18 @@ file( GLOB_RECURSE
     ${SODIUM_TESTS_BASE_DIR}/*.cpp
     )
 
-include_directories( ${Boost_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR} ${SODIUM_TESTS_BASE_DIR}/.. )
+include_directories( ${Boost_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR} ${SODIUM_TESTS_BASE_DIR}/../build/include )
 
 set( ALL_SOURCES ${SODIUM_TESTS_INCLUDE_FILES} ${SODIUM_TESTS_SOURCE_FILES} )
 
 add_executable( sodium_tests ${ALL_SOURCES} )
 
-target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} ${SODIUM_TESTS_BASE_DIR}/../build/Debug/sodium.lib )
+FIND_LIBRARY(SODIUM_LIBRARY sodium
+             ${SODIUM_TESTS_BASE_DIR}/../build/Debug)
+
+if ( SODIUM_LIBRARY )
+else ( SODIUM_LIBRARY )
+  MESSAGE(SEND_ERROR "Make sure the sodium code is built first via cmake in the ../build folder.")
+endif ( SODIUM_LIBRARY )
+
+target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} ${SODIUM_LIBRARY} )
