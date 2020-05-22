@@ -113,7 +113,7 @@ GcNode::GcNode(GcCtx gc_ctx, std::string name, DECONSTRUCTOR deconstructor, TRAC
     this->id = gc_ctx.make_id();
     GcNodeData* data = new GcNodeData();
     data->freed = false;
-    data->ref_count = 0;
+    data->ref_count = 1;
     data->ref_count_adj = 0;
     data->visited = false;
     data->color = Color::Black;

@@ -170,6 +170,14 @@ public:
         this->sodium_ctx.dec_node_ref_count();
     }
 
+    Node& operator=(const Node& node) {
+        node.gc_node.inc_ref();
+        this->data = node.data;
+        this->gc_node = node.gc_node;
+        this->sodium_ctx = node.sodium_ctx;
+        return *this;
+    }
+
     void add_update_dependency(Dep update_dependency);
 
     void add_update_dependencies(std::vector<Dep> update_dependencies);
