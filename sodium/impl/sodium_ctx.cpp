@@ -10,8 +10,8 @@ SodiumCtx::SodiumCtx() {
     data->transaction_depth = 0;
     data->allow_collect_cycles_counter = 0;
     this->data = std::unique_ptr<SodiumCtxData>(data);
-    this->node_count = 0;
-    this->node_ref_count = 0;
+    this->node_count = std::make_shared<unsigned int>(0);
+    this->node_ref_count = std::make_shared<unsigned int>(0);
 }
 
 GcCtx SodiumCtx::gc_ctx() const {
