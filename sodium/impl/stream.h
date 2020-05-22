@@ -151,9 +151,10 @@ public:
             }
             this->node().data->changed = true;
             if (is_first) {
-                sodium_ctx.pre_post([this]() {
-                    this->data->firing_op = boost::none;
-                    this->node().data->changed = false;
+                Stream<A> this_ = *this;
+                sodium_ctx.pre_post([this_]() {
+                    this_.data->firing_op = boost::none;
+                    this_.node().data->changed = false;
                 });
             }
         });
