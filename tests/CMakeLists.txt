@@ -39,4 +39,4 @@ else ( SODIUM_LIBRARY )
   MESSAGE(SEND_ERROR "Make sure the sodium code is built first via cmake in the ../build folder.")
 endif ( SODIUM_LIBRARY )
 
-target_link_libraries( sodium_tests ${CPPUNIT_LIBRARY} ${SODIUM_LIBRARY} )
+target_link_libraries( sodium_tests ${CPPUNIT_DEBUG_LIBRARY} ${SODIUM_LIBRARY} )

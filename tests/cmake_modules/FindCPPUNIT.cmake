@@ -22,16 +22,20 @@ IF(WIN32)
                  ${CPPUNIT_INCLUDE_DIR}/../lib
                  /usr/local/lib
                  /usr/lib)
+    FIND_LIBRARY(CPPUNIT_DEBUG_LIBRARY cppunitd_dll
+                 ${CPPUNIT_INCLUDE_DIR}/../debug/lib
+                 /usr/local/lib
+                 /usr/lib)
   ELSE(MSVC)
     FIND_LIBRARY(CPPUNIT_LIBRARY cppunit
                  ${CPPUNIT_INCLUDE_DIR}/../lib
                  /usr/local/lib
                  /usr/lib)
+    FIND_LIBRARY(CPPUNIT_DEBUG_LIBRARY cppunitd
+                 ${CPPUNIT_INCLUDE_DIR}/../lib
+                 /usr/local/lib
+                 /usr/lib)
   ENDIF(MSVC)
-  FIND_LIBRARY(CPPUNIT_DEBUG_LIBRARY cppunitd
-               ${CPPUNIT_INCLUDE_DIR}/../lib
-               /usr/local/lib
-               /usr/lib)
 ELSE(WIN32)
   # On unix system, debug and release have the same name
   FIND_LIBRARY(CPPUNIT_LIBRARY cppunit
