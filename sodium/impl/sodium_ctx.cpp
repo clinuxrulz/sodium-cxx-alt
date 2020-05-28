@@ -107,8 +107,8 @@ void SodiumCtx::update_node(Node& node) const {
         Node dependency2 = (*dependency)->node();
         if (!dependency2.data->visited) {
             this->update_node(dependency2);
-            any_changed |= dependency2.data->changed;
         }
+        any_changed |= dependency2.data->changed;
     }
     if (any_changed) {
         (node.data->update)();

@@ -85,6 +85,9 @@ struct GcNode {
 
     template <typename TRACER>
     void trace(TRACER tracer);
+
+private:
+    GcNode();
 };
 
 struct GcNodeData {
