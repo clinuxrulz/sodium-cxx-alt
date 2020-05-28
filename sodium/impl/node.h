@@ -62,9 +62,9 @@ public:
 
     template <typename UPDATE>
     static Node mk_node(SodiumCtx sodium_ctx, std::string name, UPDATE update, std::vector<std::unique_ptr<IsNode>> dependencies) {
-        std::shared_ptr<std::vector<std::weak_ptr<NodeData>>> forward_ref = std::shared_ptr<std::vector<std::weak_ptr<NodeData>>>(new std::vector<std::weak_ptr<NodeData>>());
+        std::shared_ptr<std::vector<std::shared_ptr<NodeData>>> forward_ref = std::shared_ptr<std::vector<std::shared_ptr<NodeData>>>(new std::vector<std::shared_ptr<NodeData>>());
         auto deconstructor = [forward_ref]() {
-            std::shared_ptr<NodeData> node_data = (*forward_ref)[0].lock();
+            std::shared_ptr<NodeData> node_data = (*forward_ref)[0];
             std::vector<std::unique_ptr<IsNode>> dependencies;
             dependencies.swap(node_data->dependencies);
             std::vector<std::unique_ptr<IsWeakNode>> dependents;
@@ -104,7 +104,7 @@ public:
             forward_ref->clear();
         };
         auto trace = [forward_ref](std::function<Tracer> tracer) {
-            std::shared_ptr<NodeData> node_data = (*forward_ref)[0].lock();
+            std::shared_ptr<NodeData> node_data = (*forward_ref)[0];
             {
                 std::vector<std::unique_ptr<IsNode>>& dependencies = node_data->dependencies;
                 for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
@@ -138,7 +138,7 @@ public:
             GcNode(sodium_ctx.gc_ctx(), name, deconstructor, trace),
             sodium_ctx
         );
-        forward_ref->push_back(std::weak_ptr<NodeData>(node_data));
+        forward_ref->push_back(node_data);
         for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
             Node dependency2 = (*dependency)->node();
             dependency2.data->dependents.push_back(node.downgrade());
