@@ -162,16 +162,6 @@ Stream<A> Cell<A>::value() const {
         node.data->changed = true;
         sodium_ctx.data->changed_nodes.push_back(spark.box_clone());
         spark._send(fire);
-        /*
-        sodium_ctx.post([sodium_ctx, this_, spark]() mutable {
-            const A& fire = **this_.data->value;
-            sodium_ctx.transaction_void([sodium_ctx, spark, fire]() mutable {
-                Node node = spark.node();
-                node.data->changed = true;
-                sodium_ctx.data->changed_nodes.push_back(spark.box_clone());
-                spark._send(fire);
-            });
-        });*/
         return s1.or_else(spark);
     });
 }
