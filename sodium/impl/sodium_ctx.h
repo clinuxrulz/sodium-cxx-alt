@@ -84,7 +84,7 @@ typedef struct SodiumCtx {
 
     void end_of_transaction() const;
 
-    void update_node(Node& node) const;
+    void update_node(const Node& node) const;
 
     void collect_cycles() const;
 

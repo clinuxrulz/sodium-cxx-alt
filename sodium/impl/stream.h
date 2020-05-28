@@ -63,7 +63,7 @@ public:
     template <typename MK_NODE>
     static Stream<A> mkStream(const SodiumCtx& sodium_ctx, MK_NODE mk_node);
 
-    virtual Node node() const {
+    virtual const Node& node() const {
         return this->_node;
     }
 
@@ -71,7 +71,7 @@ public:
         return std::unique_ptr<IsNode>(new Stream<A>(*this));
     }
 
-    virtual std::unique_ptr<IsWeakNode> downgrade() {
+    virtual std::unique_ptr<IsWeakNode> downgrade() const {
         return std::unique_ptr<IsWeakNode>(new WeakStream<A>(this->data, this->_node.downgrade2()));
     }
 
@@ -175,15 +175,15 @@ public:
 
     WeakStream(std::weak_ptr<StreamData<A>> data, WeakNode node): data(data), _node(node) {}
 
-    virtual WeakNode node() {
+    virtual const WeakNode& node() const {
         return this->_node;
     }
 
-    virtual std::unique_ptr<IsWeakNode> box_clone() {
+    virtual std::unique_ptr<IsWeakNode> box_clone() const {
         return std::unique_ptr<IsWeakNode>(new WeakStream<A>(*this));
     }
 
-    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() {
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() const {
         std::shared_ptr<StreamData<A>> data = this->data.lock();
         boost::optional<Node> node_op = this->_node.upgrade2();
         if (data && node_op) {

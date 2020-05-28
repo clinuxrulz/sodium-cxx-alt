@@ -90,7 +90,7 @@ void SodiumCtx::end_of_transaction() const {
     }
 }
 
-void SodiumCtx::update_node(Node& node) const {
+void SodiumCtx::update_node(const Node& node) const {
     if (node.data->visited) {
         return;
     }

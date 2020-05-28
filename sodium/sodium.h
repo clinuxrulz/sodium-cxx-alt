@@ -797,7 +797,7 @@ namespace sodium {
         template <typename B>
         cell<B> accum(const B& initB,
                       const std::function<B(const A&, const B&)>& f) const {
-            return accum_s(initB, f).hold(initB);
+            return cell<B>(this->impl_.accum_lazy(impl::Lazy<B>::of_value(initB), f));
         }
 
         /*!

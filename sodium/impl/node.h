@@ -28,17 +28,17 @@ class IsNode {
 public:
     virtual ~IsNode() {}
 
-    virtual Node node() const = 0;
+    virtual const Node& node() const = 0;
 
     virtual std::unique_ptr<IsNode> box_clone() const = 0;
 
-    virtual std::unique_ptr<IsWeakNode> downgrade() = 0;
+    virtual std::unique_ptr<IsWeakNode> downgrade() const = 0;
 
     GcNode gc_node();
 
-    void add_dependency(const IsNode& dependency);
+    void add_dependency(const IsNode& dependency) const;
 
-    void remove_dependency(const IsNode& dependency);
+    void remove_dependency(const IsNode& dependency) const;
 
     void add_keep_alive(const GcNode& gc_node) const;
 };
@@ -47,11 +47,11 @@ class IsWeakNode {
 public:
     virtual ~IsWeakNode() {}
 
-    virtual WeakNode node() = 0;
+    virtual const WeakNode& node() const = 0;
 
-    virtual std::unique_ptr<IsWeakNode> box_clone() = 0;
+    virtual std::unique_ptr<IsWeakNode> box_clone() const = 0;
 
-    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() = 0;
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() const = 0;
 };
 
 class Node: public IsNode {
@@ -178,11 +178,11 @@ public:
         return *this;
     }
 
-    void add_update_dependency(Dep update_dependency);
+    void add_update_dependency(Dep update_dependency) const;
 
-    void add_update_dependencies(std::vector<Dep> update_dependencies);
+    void add_update_dependencies(std::vector<Dep> update_dependencies) const;
 
-    virtual Node node() const {
+    virtual const Node& node() const {
         return *this;
     }
 
@@ -191,7 +191,7 @@ public:
         return std::unique_ptr<IsNode>(node);
     }
 
-    virtual std::unique_ptr<IsWeakNode> downgrade();
+    virtual std::unique_ptr<IsWeakNode> downgrade() const;
 
     WeakNode downgrade2() const;
 };
@@ -224,16 +224,16 @@ typedef struct WeakNode: public IsWeakNode {
     WeakNode(std::weak_ptr<NodeData> data, GcNode gc_node, SodiumCtx sodium_ctx)
     : data(data), gc_node(gc_node), sodium_ctx(sodium_ctx) {}
 
-    virtual WeakNode node() {
+    virtual const WeakNode& node() const {
         return *this;
     }
 
-    virtual std::unique_ptr<IsWeakNode> box_clone() {
+    virtual std::unique_ptr<IsWeakNode> box_clone() const {
         WeakNode* node = new WeakNode(*this);
         return std::unique_ptr<IsWeakNode>(node);
     }
 
-    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() {
+    virtual boost::optional<std::unique_ptr<IsNode>> upgrade() const {
         auto node_op = this->upgrade2();
         if (node_op) {
             return boost::optional<std::unique_ptr<IsNode>>(std::unique_ptr<IsNode>((IsNode*)new Node(*node_op)));
