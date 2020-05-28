@@ -61,6 +61,10 @@ public:
         return &this->get();
     }
 
+    A&& operator*() {
+        return this->move();
+    }
+
 private:
     const A& get() const {
         if (this->data->thunk_op) {
@@ -70,6 +74,16 @@ private:
         }
         A& a = *this->data->value_op;
         return a;
+    }
+
+public:
+    A&& move() {
+        if (this->data->thunk_op) {
+            std::function<A()>& thunk = *this->data->thunk_op;
+            this->data->value_op = boost::optional<A>(thunk());
+            this->data->thunk_op = boost::none;
+        }
+        return std::move(*this->data->value_op);
     }
 };
 

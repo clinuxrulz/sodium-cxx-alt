@@ -136,13 +136,8 @@ namespace sodium {
         }
 
         lazy<A> sample_lazy() const {
-            const SODIUM_SHARED_PTR<impl::cell_impl>& impl_(this->impl);
-            return lazy<A>([impl_]() -> A {
-                transaction trans;
-                A a = *impl_->sample().template cast_ptr<A>(NULL);
-                trans.close();
-                return a;
-            });
+            impl::Lazy<A> value = this->impl_.sample_lazy();
+            return lazy<A>([value]() -> A { return *value; });
         }
 
         /*!
@@ -411,8 +406,23 @@ namespace sodium {
         collect_lazy(const lazy<S>& initS, const Fn& f) const {
             typedef typename std::tuple_element<
                 0, typename std::result_of<Fn(A, S)>::type>::type B;
+            lazy<A> za_lazy = sample_lazy();
+            impl::Lazy<SODIUM_TUPLE<B, S>> zbs([za_lazy, initS, f]() -> SODIUM_TUPLE<B, S> {
+                return f(za_lazy(), initS());
+            });
+            return cell<B>(
+                this->impl_
+                    .updates()
+                    .collect_lazy(
+                        impl::Lazy<S>([zbs]() { return std::get<1>(*zbs); }),
+                        f
+                    )
+                    .hold_lazy(impl::Lazy<B>([zbs]() -> B {
+                        return std::get<0>(*zbs);
+                    }))
+            );
             // TODO: Implement this
-            SODIUM_THROW("not implemented yet!");
+            //SODIUM_THROW("not implemented yet!");
             /*
             transaction trans1;
             auto ea = updates().coalesce(
@@ -632,26 +642,15 @@ namespace sodium {
          * first stream occurrence updates it.
          */
         cell<A> hold(const A& initA) const {
-            transaction trans;
-            cell<A> ca(impl::Cell<A>(impl::sodium_ctx, initA));
-            trans.close();
-            return ca;
+            return cell<A>(this->impl_.hold(initA));
         }
 
         cell<A> hold(A&& initA) const {
-            transaction trans;
-            cell<A> ca(impl::Cell<A>(impl::sodium_ctx, std::move(initA)));
-            trans.close();
-            return ca;
+            return cell<A>(this->impl_.hold(std::move(initA)));
         }
 
         cell<A> hold_lazy(const lazy<A>& initA) const {
-            transaction trans;
-            cell<A> ca(hold_lazy_(trans.impl(), [initA]() -> light_ptr {
-                return light_ptr::create<A>(initA());
-            }));
-            trans.close();
-            return ca;
+            return cell<A>(this->impl_.hold_lazy(Lazy<A>([initA]() { return initA(); })));
         }
 
         /*!

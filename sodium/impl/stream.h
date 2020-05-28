@@ -101,8 +101,12 @@ public:
     template <typename FN>
     Stream<A> merge(const Stream<A>& s2, FN fn) const;
 
-    Cell<A> hold(A a) const {
+    Cell<A> hold(const A& a) const {
         return this->hold_lazy(Lazy<A>::of_value(a));
+    }
+
+    Cell<A> hold(A&& a) const {
+        return this->hold_lazy(Lazy<A>::of_value(std::move(a)));
     }
 
     Cell<A> hold_lazy(Lazy<A> a) const;
