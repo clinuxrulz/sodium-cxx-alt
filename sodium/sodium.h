@@ -993,7 +993,7 @@ namespace sodium {
     template <typename A, typename B>
     cell<B> apply(const cell<std::function<B(const A&)>>& bf,
                   const cell<A>& ba) {
-        return cell<B>(bf.impl_.lift2(ba.impl_, [](const std::function<B(const A&)> f, const A& a) { return f(a); }));
+        return cell<B>(bf.impl_.lift2(ba.impl_, [](const std::function<B(const A&)>& f, const A& a) { return f(a); }));
     }
 
     /*!
