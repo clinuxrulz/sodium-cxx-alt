@@ -327,7 +327,7 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
                     if (csa_updates.data->firing_op) {
                         Stream<A>& firing = **csa_updates.data->firing_op;
                         sodium_ctx.pre_post([node1, inner_s, firing]() mutable {
-                            Stream<A>& inner_s2 = *std::get<0>(*inner_s).upgrade2();
+                            Stream<A> inner_s2 = *std::get<0>(*inner_s).upgrade2();
                             node1.remove_dependency(inner_s2);
                             node1.add_dependency(firing);
                             *inner_s = std::tuple<WeakStream<A>>(firing.downgrade2());

@@ -71,6 +71,8 @@ struct GcNode {
     template <typename DECONSTRUCTOR, typename TRACE>
     GcNode(GcCtx gc_ctx, std::string name, DECONSTRUCTOR deconstructor, TRACE trace);
 
+    GcNode(const GcNode& other): id(other.id), name(other.name), gc_ctx(other.gc_ctx), data(other.data) {}
+
     unsigned int ref_count() const;
 
     void inc_ref() const;
