@@ -1037,9 +1037,11 @@ namespace sodium {
     private:
         impl::CellLoop<A> impl_;
 
+        cell_loop(impl::CellLoop<A> impl_): impl_(impl_), cell<A>(impl_.cell()) {
+        }
+
     public:
-        cell_loop()
-            : impl_(impl::sodium_ctx), cell<A>(impl_.cell()) {
+        cell_loop(): cell_loop(impl::CellLoop<A>(impl::sodium_ctx)) {
         }
 
         void loop(const cell<A>& b) {
