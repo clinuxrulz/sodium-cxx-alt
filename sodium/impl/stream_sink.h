@@ -17,7 +17,7 @@ public:
     Stream<A> _stream;
     SodiumCtx _sodium_ctx;
 
-    StreamSink(Stream<A> stream, SodiumCtx sodium_ctx): _stream(sodium_ctx), _sodium_ctx(sodium_ctx) {}
+    StreamSink(Stream<A> stream, SodiumCtx sodium_ctx): _stream(stream), _sodium_ctx(sodium_ctx) {}
 
     StreamSink(SodiumCtx sodium_ctx): _stream(sodium_ctx), _sodium_ctx(sodium_ctx) {}
 

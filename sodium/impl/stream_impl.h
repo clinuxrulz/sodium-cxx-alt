@@ -225,7 +225,20 @@ Stream<A> Stream<A>::split(const Stream<std::list<A>>& sxa) {
                 sodium_ctx.post([ss, a] { ss.send(a); });
             }
         });
-        s.node().add_keep_alive(listener.gc_node);
+        std::shared_ptr<boost::optional<Listener>> keep_alive = std::make_shared<boost::optional<Listener>>(boost::optional<Listener>(listener));
+        GcNode gc_node(
+            sodium_ctx.gc_ctx(),
+            "Stream::split",
+            [keep_alive]() {
+                *keep_alive = boost::none;
+            },
+            [keep_alive](std::function<Tracer> tracer) {
+                if (*keep_alive) {
+                    tracer((*keep_alive)->gc_node);
+                }
+            }
+        );
+        s.node().add_keep_alive(gc_node);
         return s;
     });
 }
