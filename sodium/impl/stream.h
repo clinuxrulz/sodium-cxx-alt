@@ -18,6 +18,13 @@ public:
     boost::optional<std::shared_ptr<A>> firing_op;
     SodiumCtx sodium_ctx;
     boost::optional<std::function<A(const A&,const A&)>> coalescer_op;
+    std::vector<std::function<void()>> cleanups;
+
+    ~StreamData() {
+        for (auto cleanup = cleanups.begin(); cleanup != cleanups.end(); ++cleanup) {
+            (*cleanup)();
+        }
+    }
 };
 
 template <typename A>
@@ -166,8 +173,29 @@ public:
 
     template <typename CLEANUP>
     Stream<A> add_cleanup(CLEANUP cleanup) const {
-        // TODO: Implement this
-        SODIUM_THROW("Not implemented yet!");
+        Stream<A> this_ = *this;
+        Stream<A> r = Stream<A>::mkStream(
+            this->sodium_ctx(),
+            [this_](StreamWeakForwardRef<A> s) {
+                std::vector<std::unique_ptr<IsNode>> dependencies;
+                dependencies.push_back(this_.box_clone());
+                Node node = Node::mk_node(
+                    this_.sodium_ctx(),
+                    "Stream::map",
+                    [this_, s]() {
+                        boost::optional<std::shared_ptr<A>>& firing_op = this_.data->firing_op;
+                        if (firing_op) {
+                            s.unwrap()._send(**firing_op);
+                        }
+                    },
+                    std::move(dependencies)
+                );
+                node.add_update_dependency(this_.to_dep());
+                return node;
+            }
+        );
+        r.data->cleanups.push_back(std::function<void()>(cleanup));
+        return r;
     }
 };
 
