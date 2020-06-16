@@ -62,6 +62,13 @@ void SodiumCtx::add_dependents_to_changed_nodes(IsNode& node) {
 void SodiumCtx::end_of_transaction() const {
     this->data->transaction_depth = this->data->transaction_depth + 1;
     this->data->allow_collect_cycles_counter = this->data->allow_collect_cycles_counter + 1;
+    {
+        std::vector<std::function<void()>> pre_eot;
+        pre_eot.swap(this->data->pre_eot);
+        for (auto k = pre_eot.begin(); k != pre_eot.end(); ++k) {
+            (*k)();
+        }
+    }
     while (this->data->changed_nodes.size() != 0) {
         std::vector<std::unique_ptr<IsNode>> changed_nodes;
         changed_nodes.swap(this->data->changed_nodes);

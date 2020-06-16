@@ -25,6 +25,7 @@ struct SodiumCtxData {
     std::vector<std::unique_ptr<IsNode>> visited_nodes;
     unsigned int transaction_depth;
     unsigned int callback_depth;
+    std::vector<std::function<void()>> pre_eot;
     std::vector<std::function<void()>> pre_post;
     std::vector<std::function<void()>> post;
     std::vector<Listener> keep_alive;
@@ -71,6 +72,11 @@ typedef struct SodiumCtx {
     }
 
     void add_dependents_to_changed_nodes(IsNode& node);
+
+    template<typename K>
+    void pre_eot(K k) const {
+        this->data->pre_eot.push_back(std::function<void()>(k));
+    }
 
     template<typename K>
     void pre_post(K k) const {

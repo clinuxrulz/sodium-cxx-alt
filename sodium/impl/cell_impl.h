@@ -157,11 +157,13 @@ Stream<A> Cell<A>::value() const {
     return sodium_ctx.transaction([sodium_ctx, this_]() mutable {
         Stream<A> s1 = this_.updates();
         Stream<A> spark(sodium_ctx);
-        const A& fire = **this_.data->value;
+        const Lazy<std::shared_ptr<A>>& fire = this_.data->value;
         Node node = spark.node();
         node.data->changed = true;
         sodium_ctx.data->changed_nodes.push_back(spark.box_clone());
-        spark._send(fire);
+        sodium_ctx.pre_eot([spark,fire]() mutable {
+            spark._send(**fire);
+        });
         return s1.or_else(spark);
     });
 }
