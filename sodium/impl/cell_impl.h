@@ -301,12 +301,8 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
         [sodium_ctx, csa](StreamWeakForwardRef<A> sa) {
             std::shared_ptr<std::tuple<WeakStream<A>>> inner_s =
                 std::shared_ptr<std::tuple<WeakStream<A>>>(
-                    new std::tuple<WeakStream<A>>(
-                        csa.sample().downgrade2()
-                    )
+                    new std::tuple<WeakStream<A>>(Stream<A>(sodium_ctx).downgrade2())
                 );
-            std::vector<std::unique_ptr<IsNode>> node1_deps;
-            node1_deps.push_back(csa.sample().box_clone());
             Node node1(
                 sodium_ctx,
                 "switch_s inner node",
@@ -317,8 +313,12 @@ Stream<A> Cell<A>::switch_s(const Cell<Stream<A>>& csa) {
                         sa.unwrap()._send(firing);
                     }
                 },
-                std::move(node1_deps)
+                std::vector<std::unique_ptr<IsNode>>()
             );
+            sodium_ctx.pre_eot([inner_s, csa, node1]() {
+                *inner_s = std::tuple<WeakStream<A>>(csa.sample().downgrade2());
+                node1.add_dependency(csa.sample());
+            });
             Stream<Stream<A>> csa_updates = csa.updates();
             std::vector<std::unique_ptr<IsNode>> node2_deps;
             node2_deps.push_back(csa_updates.box_clone());
