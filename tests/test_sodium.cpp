@@ -20,6 +20,13 @@ using namespace std;
 using namespace sodium;
 using namespace boost;
 
+void test_sodium::setUp()
+{
+    // Since any memory not freed from previous test will be carried over to next test.
+    // Set the node counter to zero, so the leaks can be seen for the *current* test.
+    sodium::reset_num_nodes();    
+}
+
 void test_sodium::tearDown()
 {
     sodium::collect_cycles();

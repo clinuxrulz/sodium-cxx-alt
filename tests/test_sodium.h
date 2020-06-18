@@ -78,6 +78,7 @@ class test_sodium : public CppUnit::TestFixture {
     CPPUNIT_TEST_SUITE_END();
 
 public:
+    virtual void setUp();
     virtual void tearDown();
 
     void stream1();

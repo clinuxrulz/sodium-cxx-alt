@@ -29,6 +29,8 @@ namespace sodium {
         extern SodiumCtx sodium_ctx;
     }
 
+    void reset_num_nodes();
+    
     void collect_cycles();
 
     int num_nodes();
