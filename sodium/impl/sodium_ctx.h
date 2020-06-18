@@ -75,16 +75,19 @@ typedef struct SodiumCtx {
 
     template<typename K>
     void pre_eot(K k) const {
+        Transaction t(*this);
         this->data->pre_eot.push_back(std::function<void()>(k));
     }
 
     template<typename K>
     void pre_post(K k) const {
+        Transaction t(*this);
         this->data->pre_post.push_back(std::function<void()>(k));
     }
 
     template<typename K>
     void post(K k) const {
+        Transaction t(*this);
         this->data->post.push_back(std::function<void()>(k));
     }
 
