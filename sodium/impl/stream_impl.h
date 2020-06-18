@@ -25,14 +25,16 @@ Stream<A> Stream<A>::mkStream(const SodiumCtx& sodium_ctx, MK_NODE mk_node) {
     }
     Stream<A> s(stream_data, node);
     stream_weak_forward_ref = s;
-    (node.data->update)();
-    if (s.data->firing_op) {
-        node.data->changed = true;
-        sodium_ctx.pre_post([s]() {
-            s.data->firing_op = boost::none;
-            s._node.data->changed = false;
-        });
-    }
+    sodium_ctx.pre_eot([sodium_ctx, s, node]() {
+        (node.data->update)();
+        if (s.data->firing_op) {
+            node.data->changed = true;
+            sodium_ctx.pre_post([s]() {
+                s.data->firing_op = boost::none;
+                s._node.data->changed = false;
+            });
+        }
+    });
     return s;
 }
 
