@@ -143,8 +143,6 @@ public:
             Node dependency2 = (*dependency)->node();
             dependency2.data->dependents.push_back(node.downgrade());
         }
-        sodium_ctx.inc_node_ref_count();
-        sodium_ctx.inc_node_count();
         return node;
     }
 
