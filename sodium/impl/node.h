@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include <boost/optional.hpp>
 #include "sodium/impl/dep.h"
@@ -194,6 +195,8 @@ public:
     WeakNode downgrade2() const;
 };
 
+extern std::unordered_set<NodeData*> living_nodes;
+
 typedef struct NodeData {
     bool visited;
     bool changed;
@@ -206,9 +209,11 @@ typedef struct NodeData {
 
     NodeData(SodiumCtx sodium_ctx): sodium_ctx(sodium_ctx) {
         this->sodium_ctx.inc_node_count();
+        living_nodes.insert(this);
     }
 
     ~NodeData() {
+        living_nodes.erase(living_nodes.find(this));
         this->sodium_ctx.dec_node_count();
     }
 

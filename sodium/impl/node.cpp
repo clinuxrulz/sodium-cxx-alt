@@ -4,6 +4,8 @@ namespace sodium {
 
 namespace impl {
 
+std::unordered_set<NodeData*> living_nodes;
+
 GcNode IsNode::gc_node() {
     return this->node().gc_node;
 }
