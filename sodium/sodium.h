@@ -29,10 +29,7 @@ namespace sodium {
         extern SodiumCtx sodium_ctx;
     }
 
-    // TODO: Create user API via wrappers of all the impl folder stuff.
-    //
-    // TODO: Create global SodiumCtx to be used via the wrappers, so
-    //       end user does not need to create and pass around a SodiumCtx.
+    void collect_cycles();
 
     template <typename A> class stream;
     template <typename A> class cell;

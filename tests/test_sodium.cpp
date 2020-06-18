@@ -20,12 +20,9 @@ using namespace std;
 using namespace sodium;
 using namespace boost;
 
-
 void test_sodium::tearDown()
 {
-#if defined(SODIUM_V2)
     sodium::collect_cycles();
-#endif
 }
 
 void test_sodium::stream1()
