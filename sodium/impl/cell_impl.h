@@ -112,7 +112,10 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
     //
     Cell c(cell_data, node);
     c_forward_ref = c;
-    (node.data->update)();
+    sodium_ctx.pre_eot([c, node]() {
+        (node.data->update)();
+        // c captured, but not used so that (node.data->update)() will not crash here
+    });
     return c;
 }
 
