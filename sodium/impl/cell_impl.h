@@ -75,10 +75,7 @@ Cell<A> Cell<A>::mkConstCell(SodiumCtx& sodium_ctx, A&& value) {
 
 template <typename A>
 Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) {
-    Lazy<std::shared_ptr<A>> init_value =
-        stream.data->firing_op ?
-            Lazy<std::shared_ptr<A>>::of_value(*stream.data->firing_op) :
-            Lazy<std::shared_ptr<A>>([value]() mutable { return std::shared_ptr<A>(std::unique_ptr<A>(new A(value.move()))); });
+    Lazy<std::shared_ptr<A>> init_value = Lazy<std::shared_ptr<A>>([value]() mutable { return std::shared_ptr<A>(std::unique_ptr<A>(new A(value.move()))); });
     std::shared_ptr<CellData<A>> cell_data =
         std::unique_ptr<CellData<A>>(new CellData<A>(
             stream,
@@ -115,6 +112,7 @@ Cell<A> Cell<A>::mkCell(SodiumCtx& sodium_ctx, Stream<A> stream, Lazy<A> value) 
     //
     Cell c(cell_data, node);
     c_forward_ref = c;
+    (node.data->update)();
     return c;
 }
 
