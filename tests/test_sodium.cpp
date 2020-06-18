@@ -23,6 +23,7 @@ using namespace boost;
 void test_sodium::tearDown()
 {
     sodium::collect_cycles();
+    CPPUNIT_ASSERT_EQUAL(0, sodium::num_nodes());
 }
 
 void test_sodium::stream1()

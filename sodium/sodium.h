@@ -31,6 +31,8 @@ namespace sodium {
 
     void collect_cycles();
 
+    int num_nodes();
+
     template <typename A> class stream;
     template <typename A> class cell;
     template <typename A> class cell_sink;
