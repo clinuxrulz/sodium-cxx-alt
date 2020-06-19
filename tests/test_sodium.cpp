@@ -816,9 +816,9 @@ void test_sodium::constant_value()
     transaction trans; 
     cell<string> a("cheese");
     auto eValue = a.value();
-    auto kill = eValue.listen([out] (const string& x) { out->push_back(x); });
+    auto unlisten = eValue.listen([out] (const string& x) { out->push_back(x); });
     trans.close();
-    kill();
+    unlisten();
     CPPUNIT_ASSERT(vector<string>({ string("cheese") }) == *out);
 }
 
