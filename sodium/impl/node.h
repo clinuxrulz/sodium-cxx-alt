@@ -170,10 +170,11 @@ public:
     }
 
     Node& operator=(const Node& node) {
-        node.gc_node.inc_ref();
+        this->gc_node.dec_ref();
         this->data = node.data;
         this->gc_node = node.gc_node;
         this->sodium_ctx = node.sodium_ctx;
+        this->gc_node.inc_ref();
         return *this;
     }
 
