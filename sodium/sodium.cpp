@@ -9,6 +9,7 @@ namespace impl {
 void reset_num_nodes() {
     *impl::sodium_ctx.node_count = 0;
     *impl::sodium_ctx.node_ref_count = 0;
+    impl::living_nodes.clear();
 }
 
 void collect_cycles() {
