@@ -829,8 +829,9 @@ void test_sodium::loop_value()
     cell_loop<string> a;
     auto eValue = a.value();
     a.loop(cell<string>("cheese"));
-    eValue.listen([out] (const string& x) { out->push_back(x); });
+    auto unlisten = eValue.listen([out] (const string& x) { out->push_back(x); });
     trans.close();
+    unlisten();
     CPPUNIT_ASSERT(vector<string>({ string("cheese") }) == *out);
 }
 
@@ -878,6 +879,7 @@ void test_sodium::lift_loop()
     auto unlisten = c.value().listen([out] (const string& x) { out->push_back(x); });
     trans.close();
     b.send("caddy");
+    unlisten();
     CPPUNIT_ASSERT(vector<string>({ string("tea kettle"), string("tea caddy") }) == *out);
 }
 
@@ -897,6 +899,7 @@ void test_sodium::loop_switch_s()
     e2.send("pear");
     b.send(e2);
     e2.send("apple");
+    unlisten();
     CPPUNIT_ASSERT(vector<string>({ string("banana"), string("apple") }) == *out);
 }
 
