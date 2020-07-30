@@ -40,6 +40,36 @@ void IsNode::add_keep_alive(const GcNode& gc_node) const {
     this->node().data->keep_alive.push_back(gc_node);
 }
 
+void IsNode::debug(std::ostream& os) const {
+    std::unordered_set<const IsNode*> visited;
+    std::vector<const IsNode*> stack;
+    stack.push_back(this);
+    while (stack.size() != 0) {
+        const IsNode* at = stack[stack.size()-1];
+        stack.pop_back();
+        if (visited.find(at) != visited.end()) {
+            continue;
+        }
+        visited.insert(at);
+        os << "(Node N" << at->node().gc_node.id << " (dependencies [";
+        auto& dependencies = at->node().data->dependencies;
+        {
+            bool first = true;
+            for (auto dependency = dependencies.begin(); dependency != dependencies.end(); ++dependency) {
+                const IsNode* dependency2 = &**dependency;
+                if (!first) {
+                    os << ", ";
+                } else {
+                    first = false;
+                }
+                os << dependency2->node().gc_node.id;
+                stack.push_back(dependency2);
+            }
+        }
+        os << "])" << std::endl;
+    }
+}
+
 void Node::add_update_dependency(Dep update_dependency) const {
     this->data->update_dependencies.push_back(update_dependency);
 }

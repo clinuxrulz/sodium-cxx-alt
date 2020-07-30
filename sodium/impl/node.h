@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <iostream>
 
 #include <boost/optional.hpp>
 #include "sodium/impl/dep.h"
@@ -42,6 +43,8 @@ public:
     void remove_dependency(const IsNode& dependency) const;
 
     void add_keep_alive(const GcNode& gc_node) const;
+
+    void debug(std::ostream& os) const;
 };
 
 class IsWeakNode {
